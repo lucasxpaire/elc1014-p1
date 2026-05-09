@@ -18,11 +18,11 @@ Considerar o jogo Connect-4 simplificado. O jogador Vermelho (V) deve decidir qu
 |   |   | | |
 | A | V | | |
 | V | A | | |
-|   | | | | |
+|   |   | | |
 
 Legenda V: vermelho e A: amarelo. As ações possíveis são: c1, c2, c3 e c4
 
-Para MCST, explicar detalhadamento:
+Para MCST, explicar detalhadamente:
 
 a) seleção;
 b) expansão;
@@ -33,7 +33,7 @@ Explicar também:
 e) papel do número de visitas;
 f) papel do número de vitórias;
 g) diferença entre exploração e explotação.
-Executar 10 iteraçõcs do algoritmo MCTS. Em cada iteraçåo apresentar:
+Executar 10 iteraçõcs do algoritmo MCTS. Em cada iteração apresentar:
 a) caminho selecionado;
 b) nó expandido;
 c) resultado do rollout;
@@ -45,26 +45,26 @@ UCT(j) = (wj / nj) + C * sqrt(ln N / nj)
 com:
 C = 1.4
 e calcular:
-a) valor de UCT para cada ilho;
-b) nỏ selecionado;
-c) intuencia do termo de exploração;
-d) influềncia do ternmo de explotação.
+a) valor de UCT para cada filho;
+b) nó selecionado;
+c) influência do termo de exploração;
+d) influência do ternmo de explotação.
 Apresentar a seguinte tabela:
 | Jogada | Visitas | Vitórias | UCT |
 | c1 | 3 | 2 | ...
 | c2 | 5 | 4 | ...
 | c5 | 1 | 1 | ...
 
-Executar novanente o algoritno utilizando C= (0.1 e depois C= 3.0 e comparar:
+Executar novanente o algoritmo utilizando C= (0.1 e depois C= 3.0 e comparar:
 
-a) quanticdade de exploração;
+a) quantidade de exploração;
 b) diversidade de jogadas;
 c) estabilidade das decisões;
 d) qualidade das jogadas encontradas.
 
 Implementar dois tipos de rollout:
 
-1. rollout totalnente aleatório;
+1. rollout totalmente aleatório;
 2. rollout semi-guloso:
     • priorizar jogadas centrais;
     • bloquear vitória imediata do adversário.
@@ -73,11 +73,13 @@ a) qualidade das decisões;
 b) velocidade de convergência;
 c) número de simulações necessárias.
 
-Implementar seleção, erpansão, rollout, retropropagação e cálculo de
+Implementar seleção, expansão, rollout, retropropagação e cálculo de
 UCT em Python respeitando os seguintes critérios: NÃO utilizar bi
-bliotecas externas, bibliotecas prontas de jogos e implementações encon
-tradas na internet. Todo o código deve ser autoral.
-Por fim, comparar: a) rollout aleatório vs semi-guloso; b) diferentes va
-lores de C; c) número de iterações; d) estabilidade das decisöes
+bliotecas externas, bibliotecas prontas de jogos e implementações encontradas na internet. Todo o código deve ser autoral.
+Por fim, comparar: a) rollout aleatório vs semi-guloso; b) diferentes valores de C; c) número de iterações; d) estabilidade das decisões
 
 [FIM DO TEXTO DA QUESTÃO]
+
+Entregue o código LaTeX formatado, bem como os scripts do Python.
+Orientações para o LaTeX:
+- crie tabelas para apresentar os dados e estatísticas organizadas, principalmente para comparar algoritmos e cenários.

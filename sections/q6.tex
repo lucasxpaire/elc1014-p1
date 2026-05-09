@@ -1,0 +1,100 @@
+\section*{Questão 06 - Monte Carlo Tree Search (MCTS)}
+
+\subsection*{A) Funcionamento Teórico do MCTS}
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{Seleção:} O algoritmo percorre a árvore desde a raiz, selecionando os filhos que maximizam a fórmula UCB1 (UCT) até encontrar um nó folha (que ainda possui movimentos não expandidos).
+    \item \textbf{Expansão:} Ao atingir um nó folha da árvore construída, um ou mais movimentos válidos que ainda não foram simulados são adicionados à árvore. Normalmente, expande-se um único nó novo por iteração.
+    \item \textbf{Simulação (Rollout):} A partir do novo nó gerado, o jogo é simulado até o fim (vitória, derrota ou empate) usando uma política padrão, geralmente realizando lances puramente aleatórios.
+    \item \textbf{Retropropagação:} O resultado final (utilidade) da simulação sobe pelo caminho percorrido na árvore, atualizando as estatísticas do nó raiz até o nó recém-expandido.
+    \item \textbf{Papel do número de visitas ($N$ e $n_i$):} Mede a confiabilidade daquele nó. Nós mais visitados representam caminhos mais promissores e reduzem o valor do termo exploratório da fórmula UCT.
+    \item \textbf{Papel do número de vitórias ($w_i$):} Representa a qualidade (explotação) daquele estado. Alta taxa de vitórias incentiva o UCT a priorizar essa jogada.
+    \item \textbf{Exploração vs Explotação:} A \textit{exploração} busca investigar caminhos desconhecidos ou pouco visitados (evitando máximos locais), enquanto a \textit{explotação} foca em se aprofundar nos caminhos que já demonstraram alta taxa de sucesso. O MCTS equilibra ambos através do parâmetro $C$.
+\end{enumerate}
+
+\subsection*{B) Execução das 10 Iterações}
+
+As 10 iterações a partir do tabuleiro inicial foram processadas com $C=1.4$ e Rollout Aleatório. O tabuleiro $4 \times 5$ submetido a gravidade padrão tem o seguinte estado na raiz (linha superior vazia):
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{c1} & \textbf{c2} & \textbf{c3} & \textbf{c4} \\ \hline
+  &   &   &   \\ \hline
+  &   &   &   \\ \hline
+A & V &   &   \\ \hline
+V & A &   &   \\ \hline
+  &   &   &   \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Iteração} & \textbf{Caminho Selecionado} & \textbf{Nó Expandido} & \textbf{Rollout} & \textbf{Atualização (N, W)} \\ \hline
+1 & c1 & c1 & Empate & N=1, W=0.5 \\ \hline
+2 & c2 & c2 & Amarelo & N=1, W=0.0 \\ \hline
+3 & c3 & c3 & Empate & N=1, W=0.5 \\ \hline
+4 & c4 & c4 & Vermelho & N=1, W=1.0 \\ \hline
+5 & c4 $\rightarrow$ c1 & c1 & Vermelho & N=1, W=0.0* \\ \hline
+6 & c1 $\rightarrow$ c1 & c1 & Empate & N=1, W=0.5 \\ \hline
+7 & c3 $\rightarrow$ c1 & c1 & Amarelo & N=1, W=1.0 \\ \hline
+8 & c4 $\rightarrow$ c2 & c2 & Vermelho & N=1, W=0.0* \\ \hline
+9 & c4 $\rightarrow$ c3 & c3 & Vermelho & N=1, W=0.0* \\ \hline
+10 & c2 $\rightarrow$ c1 & c1 & Empate & N=1, W=0.5 \\ \hline
+\end{tabular}
+\caption{*W=0 pois a vitória foi do Vermelho, e o nó expandido era vez do Amarelo.}
+\end{table}
+
+\subsection*{C) Cálculo do UCT}
+
+Fórmula matemática utilizada pelo algoritmo:
+\[ UCT(j) = \frac{w_i}{n_i} + C \sqrt{\frac{\ln N}{n_i}} \]
+
+A partir da tabela genérica solicitada, temos $N = 3 + 5 + 1 = 9$ visitas totais do nó pai.
+
+\begin{itemize}
+    \item \textbf{c1:} $\frac{2}{3} + 1.4 \times \sqrt{\frac{\ln 9}{3}} \approx 0.666 + 1.4 \times 0.855 \approx 0.666 + 1.198 = \textbf{1.864}$
+    \item \textbf{c2:} $\frac{4}{5} + 1.4 \times \sqrt{\frac{\ln 9}{5}} \approx 0.800 + 1.4 \times 0.662 \approx 0.800 + 0.927 = \textbf{1.727}$
+    \item \textbf{c5:} $\frac{1}{1} + 1.4 \times \sqrt{\frac{\ln 9}{1}} \approx 1.000 + 1.4 \times 1.482 \approx 1.000 + 2.075 = \textbf{3.075}$
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Jogada} & \textbf{Visitas ($n_i$)} & \textbf{Vitórias ($w_i$)} & \textbf{UCT} \\ \hline
+c1 & 3 & 2 & 1.864 \\ \hline
+c2 & 5 & 4 & 1.727 \\ \hline
+\textbf{c5} & \textbf{1} & \textbf{1} & \textbf{3.075} \\ \hline
+\end{tabular}
+\end{table}
+
+\textbf{Análise:} 
+O nó selecionado será o \textbf{c5}. O termo de exploração (que divide a $\ln N$ pelas visitas do nó) puniu fortemente o nó \textbf{c2} por ter sido muito visitado, reduzindo sua parcela exploratória para 0.927. Já o nó \textbf{c5}, com apenas 1 visita, teve uma injeção de \textbf{2.075} de bonificação exploratória. Assim, mesmo o $c2$ tendo alta explotação ($80\%$), a incerteza do $c5$ forçou sua seleção.
+
+\subsection*{D) Impacto do Parâmetro de Exploração (C)}
+
+Executamos o MCTS por 500 iterações para verificar a distribuição de visitas nos 4 ramos primários variando o constante C.
+
+\begin{itemize}
+    \item \textbf{$C=0.1$ (Foco em Explotação):} A distribuição foi $c1=24, c2=2, c3=38, c4=436$. O algoritmo viciou quase imediatamente na jogada $c4$, ignorando as outras possibilidades. A diversidade é minúscula e a estabilidade das decisões é alta (sempre fará o c4). A qualidade da jogada é incerta, pois pode ter travado em um falso positivo inicial.
+    \item \textbf{$C=3.0$ (Foco em Exploração):} A distribuição foi $c1=98, c2=116, c3=115, c4=171$. O algoritmo explorou as opções de maneira quase uniforme, buscando avidamente caminhos não testados. A diversidade é imensa, mas a estabilidade das decisões demora muito para convergir. Exige muito mais processamento para definir uma jogada ótima com segurança.
+\end{itemize}
+
+\subsection*{E) Rollout Aleatório vs Rollout Semi-Guloso}
+
+Adicionar conhecimento de domínio (Priorizar centro e Bloquear vitórias imediatas) altera fundamentalmente o MCTS:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{6cm}|p{6cm}|}
+\hline
+\textbf{Característica} & \textbf{Rollout Aleatório} & \textbf{Rollout Semi-Guloso} \\ \hline
+\textbf{Velocidade por nó} & Altíssima. Sem checks lógicos, desce até o fim do tabuleiro instantaneamente. & Lenta. Exige testar a heurística para o oponente e para si em cada passo simulado. \\ \hline
+\textbf{Convergência} & Demorada. Como faz lances suicidas na simulação, exige milhares de iterações para estatisticamente "aprender" a desviar de derrotas simples. & Rápida. Impede derrotas infantis nos rollouts, o que gera vitórias (W) altamente embasadas em poucas simulações. \\ \hline
+\textbf{Visitas} & Comportamento instável. Distribuição focou desproporcionalmente em ramos fáceis de empatar ($c4=44$ vs $c2=15$). & Distribuição uniforme inteligente ($27, 24, 23, 26$), espalhando a busca por evitar perdas óbvias em todo o espectro. \\ \hline
+\end{tabular}
+\end{table}
