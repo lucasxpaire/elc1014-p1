@@ -49,6 +49,14 @@ Exemplo de linha da tabela: 1, A, [B, C, D]
 
 C) Implemente os três algoritmos em Python (sem libs externas).
 D) Experimento: modifique a ordem dos sucessores de dois nós, por exemplo de C -> G, H para C -> H, G, execute os algoritmos novamente, compare os resultados e analise o impacto. Responda as perguntas a-e da prova sobre o experimento.
+[INÍCIO DAS PERGUNTAS A-E DA PROVA]
+a) O caminho solução mudou?
+b) A quantidade de nós expandidos mudou?
+c) Algum algoritmo foi mais sensível à ordem dos sucessores?
+d) Qual algoritmo apresentou maior consumo de memória?
+e) Qual algoritmo encontrou a solução mais rapidamente?
+[FIM DAS PERGUNTAS A-E DA PROVA]
+
 E) Por fim, compare os algoritmos considerando completude, otimalidade, complexidade de tempo, complexidade de espaço, dependência da ordem dos sucessores, comportamento em árvores profundas, adequação para problemas grandes.
 [FIM DO TEXTO DA QUESTÃO]
 

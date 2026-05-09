@@ -1,0 +1,79 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage[edges]{forest}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\usepackage{listings}
+\lstdefinestyle{py}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{orange!60!black},
+  numbers=left,
+  numberstyle=\scriptsize\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  tabsize=4,
+  extendedchars=true,
+  literate={á}{{\'a}}1 {ã}{{\~a}}1 {â}{{\^a}}1 {à}{{\`a}}1 {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {õ}{{\~o}}1 {ô}{{\^o}}1 {ú}{{\'u}}1 {ç}{{\c{c}}}1 {Á}{{\'A}}1 {Ã}{{\~A}}1 {Â}{{\^A}}1 {À}{{\`A}}1 {É}{{\'E}}1 {Ê}{{\^E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ô}{{\^O}}1 {Ú}{{\'U}}1 {Ç}{{\c{C}}}1
+}
+\lstset{style=py}
+
+\newcommand{\estado}[1]{\texttt{#1}}
+\newcommand{\fronteira}{\textit{fronteira}}
+
+\title{Prova 1 - Inteligência Artificial\\Resolução de Questões}
+\author{Aluno: Diego}
+\date{Maio de 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{Orientações}
+\begin{itemize}[leftmargin=1.5em]
+  \item Resolução detalhada das questões da Prova 1 de IA.
+  \item As árvores de busca foram geradas utilizando \texttt{tikz}.
+  \item Os códigos Python utilizados para os experimentos estão anexados no apêndice.
+\end{itemize}
+
+\input{sections/q1}
+% \input{sections/q2}
+% \input{sections/q3}
+% \input{sections/q4}
+% \input{sections/q5}
+% \input{sections/q6}
+
+\appendix
+\section{Códigos Python}
+
+\subsection{Questão 1 - Buscas e Experimento}
+\lstinputlisting{q1/busca.py}
+\lstinputlisting{q1/experimento.py}
+
+\end{document}

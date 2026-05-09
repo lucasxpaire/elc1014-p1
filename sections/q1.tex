@@ -1,0 +1,502 @@
+\section*{Questão 01 - Busca em Espaço de Estados}
+
+\subsection*{A) Modelagem do Problema}
+
+A formulação do problema de busca em espaço de estados é definida pelos seguintes componentes:
+
+\begin{itemize}
+    \item \textbf{Representação do Estado}: Uma string ou caractere representando a sala atual em que o agente se encontra. Ex: $s \in \{A, B, C, \dots, S\}$.
+    \item \textbf{Estado Inicial}: O agente começa na sala $A$. $s_0 = A$.
+    \item \textbf{Teste de Objetivo}: Verifica se o estado atual é o estado objetivo $S$. Função $Objetivo(s) = Verdadeiro$ se $s = S$, caso contrário $Falso$.
+    \item \textbf{Função Sucessora}: Uma função que, dado um estado $s$, retorna os possíveis movimentos permitidos para as salas vizinhas, preservando a ordem obrigatória de visita. $Sucessores(A) = \{B, C, D\}$, $Sucessores(B) = \{E, F\}$, etc.
+    \item \textbf{Função de Custo}: O custo de se mover de uma sala para uma sala vizinha. Como todas as ações possuem custo unitário, o custo do caminho é o número de movimentos realizados. $c(s, a, s') = 1$.
+\end{itemize}
+
+\textbf{Representação em Python:}
+\begin{lstlisting}[language=Python]
+graph = {
+    'A': ['B', 'C', 'D'], 'B': ['E', 'F'], 'C': ['G', 'H'],
+    'D': ['I'], 'E': ['J'], 'F': ['K', 'L'], 'G': ['M'],
+    'H': ['N', 'O'], 'I': ['P'], 'J': [], 'K': ['Q'],
+    'L': [], 'M': ['R'], 'N': [], 'O': ['S'], 'P': [],
+    'Q': [], 'R': [], 'S': []
+}
+initial_state = 'A'
+goal_state = 'S'
+\end{lstlisting}
+
+\subsection*{B) Execução dos Algoritmos}
+
+\subsubsection*{1. Busca em Amplitude (BFS)}
+
+\textbf{Métricas da Solução BFS:}
+\begin{itemize}
+    \item \textbf{Caminho Solução:} A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ S
+    \item \textbf{Custo da Solução:} 4
+    \item \textbf{Profundidade da Solução:} 4
+    \item \textbf{Nós Expandidos:} 15
+    \item \textbf{Nós Gerados:} 19
+\end{itemize}
+
+\textbf{Tabela de Execução (Fronteira tratada como Fila - FIFO):}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira (após expansão e inserção)} \\ \hline
+1 & A & [B, C, D] \\ \hline
+2 & B & [C, D, E, F] \\ \hline
+3 & C & [D, E, F, G, H] \\ \hline
+4 & D & [E, F, G, H, I] \\ \hline
+5 & E & [F, G, H, I, J] \\ \hline
+6 & F & [G, H, I, J, K, L] \\ \hline
+7 & G & [H, I, J, K, L, M] \\ \hline
+8 & H & [I, J, K, L, M, N, O] \\ \hline
+9 & I & [J, K, L, M, N, O, P] \\ \hline
+10 & J & [K, L, M, N, O, P] \\ \hline
+11 & K & [L, M, N, O, P, Q] \\ \hline
+12 & L & [M, N, O, P, Q] \\ \hline
+13 & M & [N, O, P, Q, R] \\ \hline
+14 & N & [O, P, Q, R] \\ \hline
+15 & O & [P, Q, R, S] \\ \hline
+16 & S & Objetivo Alcançado \\ \hline
+\end{tabular}
+\end{table}
+
+\textbf{Árvore Parcial de Busca (BFS):}
+\textit{Legenda: Nós azuis (\textcolor{blue}{Nó}) foram expandidos. O nó em verde (\textcolor{green!70!black}{Nó}) é o objetivo alcançado. Nós brancos foram gerados mas não expandidos.}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=1.5cm},
+  level 3/.style={sibling distance=1.2cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E}
+        child {node[fill=blue!20] {J}}
+      }
+      child {node[fill=blue!20] {F}
+        child {node[fill=blue!20] {K}
+          child {node {Q}}
+        }
+        child {node[fill=blue!20] {L}}
+      }
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {G}
+        child {node[fill=blue!20] {M}
+          child {node {R}}
+        }
+      }
+      child {node[fill=blue!20] {H}
+        child {node[fill=blue!20] {N}}
+        child {node[fill=blue!20] {O}
+          child {node[fill=green!40] {S}}
+        }
+      }
+    }
+    child {node[fill=blue!20] {D}
+      child {node[fill=blue!20] {I}
+        child {node {P}}
+      }
+    };
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{2. Busca em Profundidade (DFS)}
+
+Na DFS, os vizinhos são adicionados à pilha (LIFO) de modo que o primeiro vizinho na ordem seja expandido primeiro. Para que B seja o primeiro filho de A visitado, empilhamos na ordem inversa (D, C, B).
+
+\textbf{Métricas da Solução DFS:}
+\begin{itemize}
+    \item \textbf{Caminho Solução:} A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ S
+    \item \textbf{Custo da Solução:} 4
+    \item \textbf{Profundidade da Solução:} 4
+    \item \textbf{Nós Expandidos:} 15
+    \item \textbf{Nós Gerados:} 17
+\end{itemize}
+
+\textbf{Tabela de Execução (Fronteira tratada como Pilha - LIFO, topo à direita):}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira (após expansão e inserção)} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C, F, E] \\ \hline
+3 & E & [D, C, F, J] \\ \hline
+4 & J & [D, C, F] \\ \hline
+5 & F & [D, C, L, K] \\ \hline
+6 & K & [D, C, L, Q] \\ \hline
+7 & Q & [D, C, L] \\ \hline
+8 & L & [D, C] \\ \hline
+9 & C & [D, H, G] \\ \hline
+10 & G & [D, H, M] \\ \hline
+11 & M & [D, H, R] \\ \hline
+12 & R & [D, H] \\ \hline
+13 & H & [D, O, N] \\ \hline
+14 & N & [D, O] \\ \hline
+15 & O & [D, S] \\ \hline
+16 & S & Objetivo Alcançado \\ \hline
+\end{tabular}
+\end{table}
+
+\textbf{Árvore Parcial de Busca (DFS):}
+\textit{Legenda: Nós azuis (\textcolor{blue}{Nó}) foram expandidos. O nó em verde (\textcolor{green!70!black}{Nó}) é o objetivo alcançado. Nós brancos na fronteira.}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=1.5cm},
+  level 3/.style={sibling distance=1.2cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E}
+        child {node[fill=blue!20] {J}}
+      }
+      child {node[fill=blue!20] {F}
+        child {node[fill=blue!20] {K}
+          child {node[fill=blue!20] {Q}}
+        }
+        child {node[fill=blue!20] {L}}
+      }
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {G}
+        child {node[fill=blue!20] {M}
+          child {node[fill=blue!20] {R}}
+        }
+      }
+      child {node[fill=blue!20] {H}
+        child {node[fill=blue!20] {N}}
+        child {node[fill=blue!20] {O}
+          child {node[fill=green!40] {S}}
+        }
+      }
+    }
+    child {node {D}};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{3. Busca Iterativa em Profundidade (IDS)}
+
+A IDS executa DLS (DFS limitada por profundidade) iterativamente para $l=0, 1, 2, 3, 4$. O nó $S$ é alcançado no limite $l=4$.
+
+\textbf{Métricas da Solução IDS:}
+\begin{itemize}
+    \item \textbf{Caminho Solução:} A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ S
+    \item \textbf{Custo da Solução:} 4
+    \item \textbf{Profundidade da Solução:} 4
+    \item \textbf{Nós Expandidos (Acumulado em todas iterações):} 27
+    \item \textbf{Nós Gerados (Acumulado em todas iterações):} 47
+\end{itemize}
+
+\textbf{Limite $l = 0$}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira} \\ \hline
+1 & A & [] (Limite atingido) \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A};
+\end{tikzpicture}
+\end{center}
+
+\textbf{Limite $l = 1$}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C] (Limite atingido) \\ \hline
+3 & C & [D] (Limite atingido) \\ \hline
+4 & D & [] (Limite atingido) \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm, sibling distance=1.5cm,
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}}
+    child {node[fill=blue!20] {C}}
+    child {node[fill=blue!20] {D}};
+\end{tikzpicture}
+\end{center}
+
+\textbf{Limite $l = 2$}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C, F, E] \\ \hline
+3 & E & [D, C, F] (Limite atingido) \\ \hline
+4 & F & [D, C] (Limite atingido) \\ \hline
+5 & C & [D, H, G] \\ \hline
+6 & G & [D, H] (Limite atingido) \\ \hline
+7 & H & [D] (Limite atingido) \\ \hline
+8 & D & [I] \\ \hline
+9 & I & [] (Limite atingido) \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm, level 1/.style={sibling distance=3cm}, level 2/.style={sibling distance=1.5cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E}}
+      child {node[fill=blue!20] {F}}
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {G}}
+      child {node[fill=blue!20] {H}}
+    }
+    child {node[fill=blue!20] {D}
+      child {node[fill=blue!20] {I}}
+    };
+\end{tikzpicture}
+\end{center}
+
+\textbf{Limite $l = 3$}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C, F, E] \\ \hline
+3 & E & [D, C, F, J] \\ \hline
+4 & J & [D, C, F] (Limite atingido) \\ \hline
+5 & F & [D, C, L, K] \\ \hline
+6 & K & [D, C, L] (Limite atingido) \\ \hline
+7 & L & [D, C] (Limite atingido) \\ \hline
+8 & C & [D, H, G] \\ \hline
+9 & G & [D, H, M] \\ \hline
+10 & M & [D, H] (Limite atingido) \\ \hline
+11 & H & [D, O, N] \\ \hline
+12 & N & [D, O] (Limite atingido) \\ \hline
+13 & O & [D] (Limite atingido) \\ \hline
+14 & D & [I] \\ \hline
+15 & I & [P] \\ \hline
+16 & P & [] (Limite atingido) \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm, level 1/.style={sibling distance=3cm}, level 2/.style={sibling distance=1.5cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E} child {node[fill=blue!20] {J}}}
+      child {node[fill=blue!20] {F} child {node[fill=blue!20] {K}} child {node[fill=blue!20] {L}}}
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {G} child {node[fill=blue!20] {M}}}
+      child {node[fill=blue!20] {H} child {node[fill=blue!20] {N}} child {node[fill=blue!20] {O}}}
+    }
+    child {node[fill=blue!20] {D}
+      child {node[fill=blue!20] {I} child {node[fill=blue!20] {P}}}
+    };
+\end{tikzpicture}
+\end{center}
+
+\textbf{Limite $l = 4$ (Objetivo Alcançado)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C, F, E] \\ \hline
+3 & E & [D, C, F, J] \\ \hline
+4 & J & [D, C, F] \\ \hline
+5 & F & [D, C, L, K] \\ \hline
+6 & K & [D, C, L, Q] \\ \hline
+7 & Q & [D, C, L] \\ \hline
+8 & L & [D, C] \\ \hline
+9 & C & [D, H, G] \\ \hline
+10 & G & [D, H, M] \\ \hline
+11 & M & [D, H, R] \\ \hline
+12 & R & [D, H] \\ \hline
+13 & H & [D, O, N] \\ \hline
+14 & N & [D, O] \\ \hline
+15 & O & [D, S] \\ \hline
+16 & S & Objetivo Alcançado \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm, level 1/.style={sibling distance=3cm}, level 2/.style={sibling distance=1.5cm}, level 3/.style={sibling distance=1.2cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E} child {node[fill=blue!20] {J}}}
+      child {node[fill=blue!20] {F} child {node[fill=blue!20] {K} child {node[fill=blue!20] {Q}}} child {node[fill=blue!20] {L}}}
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {G} child {node[fill=blue!20] {M} child {node[fill=blue!20] {R}}}}
+      child {node[fill=blue!20] {H} child {node[fill=blue!20] {N}} child {node[fill=blue!20] {O} child {node[fill=green!40] {S}}}}
+    }
+    child {node {D}};
+\end{tikzpicture}
+\end{center}
+
+\subsection*{C) Implementações em Python}
+
+Os códigos fonte estão no Apêndice deste documento.
+
+\subsection*{D) Experimento Adicional: Ordem C $\rightarrow$ H, G}
+
+Ao modificar a ordem dos sucessores de C de \texttt{(G, H)} para \texttt{(H, G)}, as execuções dos algoritmos se alteram. Abaixo estão as novas tabelas e árvores para a Busca em Amplitude, Busca em Profundidade e Busca Iterativa em Profundidade (focando no limite onde o objetivo é encontrado para poupar espaço).
+
+\subsubsection*{1. Busca em Amplitude (Exp.)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira (após expansão e inserção)} \\ \hline
+1 & A & [B, C, D] \\ \hline
+2 & B & [C, D, E, F] \\ \hline
+3 & C & [D, E, F, H, G] \\ \hline
+4 & D & [E, F, H, G, I] \\ \hline
+5 & E & [F, H, G, I, J] \\ \hline
+6 & F & [H, G, I, J, K, L] \\ \hline
+7 & H & [G, I, J, K, L, N, O] \\ \hline
+8 & G & [I, J, K, L, N, O, M] \\ \hline
+9 & I & [J, K, L, N, O, M, P] \\ \hline
+10 & J & [K, L, N, O, M, P] \\ \hline
+11 & K & [L, N, O, M, P] \\ \hline
+12 & L & [N, O, M, P, Q] \\ \hline
+13 & N & [O, M, P, Q] \\ \hline
+14 & O & [M, P, Q, S] \\ \hline
+15 & S & Objetivo Alcançado \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm, level 1/.style={sibling distance=3cm}, level 2/.style={sibling distance=1.5cm}, level 3/.style={sibling distance=1.2cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E} child {node[fill=blue!20] {J}}}
+      child {node[fill=blue!20] {F} child {node[fill=blue!20] {K}} child {node[fill=blue!20] {L}}}
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {H} child {node[fill=blue!20] {N}} child {node[fill=blue!20] {O} child {node[fill=green!40] {S}}}}
+      child {node[fill=blue!20] {G} child {node {M}}}
+    }
+    child {node[fill=blue!20] {D}
+      child {node[fill=blue!20] {I} child {node {P}}}
+    };
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{2. Busca em Profundidade (Exp.)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira (após expansão e inserção)} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C, F, E] \\ \hline
+3 & E & [D, C, F, J] \\ \hline
+4 & J & [D, C, F] \\ \hline
+5 & F & [D, C, L, K] \\ \hline
+6 & K & [D, C, L, Q] \\ \hline
+7 & Q & [D, C, L] \\ \hline
+8 & L & [D, C] \\ \hline
+9 & C & [D, G, H] \\ \hline
+10 & H & [D, G, O, N] \\ \hline
+11 & N & [D, G, O] \\ \hline
+12 & O & [D, G, S] \\ \hline
+13 & S & Objetivo Alcançado \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+\begin{tikzpicture}[level distance=1.2cm, level 1/.style={sibling distance=3cm}, level 2/.style={sibling distance=1.5cm}, level 3/.style={sibling distance=1.2cm},
+  every node/.style={circle, draw, minimum size=0.6cm, inner sep=1pt}]
+  \node[fill=blue!20] {A}
+    child {node[fill=blue!20] {B}
+      child {node[fill=blue!20] {E} child {node[fill=blue!20] {J}}}
+      child {node[fill=blue!20] {F} child {node[fill=blue!20] {K} child {node[fill=blue!20] {Q}}} child {node[fill=blue!20] {L}}}
+    }
+    child {node[fill=blue!20] {C}
+      child {node[fill=blue!20] {H} child {node[fill=blue!20] {N}} child {node[fill=blue!20] {O} child {node[fill=green!40] {S}}}}
+      child {node {G}}
+    }
+    child {node {D}};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{3. Busca Iterativa em Profundidade (Exp. - Último Limite $l=4$)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Nó Expandido} & \textbf{Conteúdo da Fronteira} \\ \hline
+1 & A & [D, C, B] \\ \hline
+2 & B & [D, C, F, E] \\ \hline
+3 & E & [D, C, F, J] \\ \hline
+4 & J & [D, C, F] \\ \hline
+5 & F & [D, C, L, K] \\ \hline
+6 & K & [D, C, L, Q] \\ \hline
+7 & Q & [D, C, L] \\ \hline
+8 & L & [D, C] \\ \hline
+9 & C & [D, G, H] \\ \hline
+10 & H & [D, G, O, N] \\ \hline
+11 & N & [D, G, O] \\ \hline
+12 & O & [D, G, S] \\ \hline
+13 & S & Objetivo Alcançado \\ \hline
+\end{tabular}
+\end{table}
+
+A árvore da IDS é idêntica à árvore da DFS para o experimento, pois encontra o objetivo antes de esgotar o limite no ramo em que se aprofunda.
+
+\subsubsection*{Respostas (Questões a-e)}
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{O caminho solução mudou?} Não. O caminho encontrado permaneceu A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ S em todos os algoritmos.
+    \item \textbf{A quantidade de nós expandidos mudou?} Sim. Em todos os três algoritmos houve uma redução na quantidade de nós expandidos (DFS de 15 para 12; BFS de 15 para 14; IDS total de 27 para 25).
+    \item \textbf{Algum algoritmo foi mais sensível à ordem dos sucessores?} Sim, a Busca em Profundidade (DFS) foi a mais sensível. Pela natureza de sua exploração, a inversão de nós próximos ao topo fez a busca focar rapidamente na subárvore que continha o objetivo, ignorando a árvore profunda de $G$.
+    \item \textbf{Qual algoritmo apresentou maior consumo de memória?} A Busca em Amplitude (BFS) consumiu mais memória em ambos os casos, pois ela retém em sua fronteira nós de todo um nível antes de prosseguir, tendo a fronteira máxima maior do que a DFS.
+    \item \textbf{Qual algoritmo encontrou a solução mais rapidamente?} No contexto do experimento, a DFS foi o algoritmo que encontrou a solução de maneira mais rápida, precisando de apenas 12 expansões (contra 14 do BFS).
+\end{enumerate}
+
+
+\subsection*{E) Comparação dos Algoritmos}
+
+\begin{table}[h!]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|p{4.5cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\textbf{Critério} & \textbf{BFS} & \textbf{DFS} & \textbf{IDS} \\ \hline
+\textbf{Completude} & Sim (se $b$ finito) & Não (em espaços infinitos/ciclos) & Sim (se $b$ finito) \\ \hline
+\textbf{Otimalidade} & Sim (para custos unitários) & Não & Sim (para custos unitários) \\ \hline
+\textbf{Complexidade de Tempo} & $O(b^d)$ & $O(b^m)$ & $O(b^d)$ \\ \hline
+\textbf{Complexidade de Espaço} & $O(b^d)$ (memória pesada) & $O(bm)$ (linear) & $O(bd)$ (linear) \\ \hline
+\textbf{Adequação p/ Problemas Grandes} & Ruim (estoura RAM) & Boa (se limite $m$ viável) & Ótima (baixo consumo de mem) \\ \hline
+\end{tabular}
+}
+\end{table}
+
+\textbf{Análise Teórica:}
+\begin{itemize}
+    \item \textbf{Dependência da Ordem dos Sucessores:} A DFS é fortemente dependente, pois uma escolha "errada" pode enviá-la para um subgrafo profundo e sem solução, demorando muito tempo. O experimento mostrou que a DFS foi muito sensível. A BFS é menos sensível na quantidade macro de passos.
+    \item \textbf{Comportamento em Árvores Profundas:} A DFS pode falhar se $m = \infty$ (perda de completude) ou demorar indefinidamente. A BFS sofrerá exaustão de memória em árvores rasas mas com fator de ramificação alto.
+    \item \textbf{Resumo:} A IDS combina os pontos fortes de ambos (completude e otimalidade do BFS + consumo linear de espaço da DFS), ao custo de gerar os estados do topo da árvore múltiplas vezes, o que afeta minimamente a complexidade de tempo assintótica.
+\end{itemize}
