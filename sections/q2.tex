@@ -1,48 +1,47 @@
-\section*{Questão 02 - Busca Gulosa pela Melhor Escolha e A*}
+\section*{Resolução da Questão 2: Busca Gulosa e A*}
 
-\subsection*{A) Modelagem do Problema}
+\subsection*{A) Estruturação Lógica do Problema}
 
-A formulação do problema de navegação em ambiente parcialmente bloqueado como busca em espaço de estados:
+A formulação heurística do robô em malha com bloqueios:
 
 \begin{itemize}
-    \item \textbf{Representação do Estado}: Identificação de cada posição no mapa como um caractere alfabético. $s \in \{A, B, C, \dots, T\}$.
-    \item \textbf{Estado Inicial}: Posição $A$.
-    \item \textbf{Teste de Objetivo}: O estado atual $s$ é o objetivo se $s = T$.
-    \item \textbf{Função Sucessora}: Conjunto de sucessores para cada nó com seus respectivos custos de aresta. Ex: $Sucessores(A) = \{(B, 2), (C, 4), (D, 3)\}$.
-    \item \textbf{Função de Custo}: $c(s, a, s')$ é o custo da aresta entre os nós $s$ e $s'$. O custo do caminho $g(n)$ é a soma dos pesos das arestas desde a raiz até o nó $n$.
-    \item \textbf{Interpretação da Heurística $h(n)$}: Representa uma estimativa (heurística) da distância de menor custo que resta para percorrer do nó $n$ até o objetivo $T$. No caso do A*, se $h(n)$ for admissível ($h(n) \le h^*(n)$), o algoritmo garante encontrar a solução ótima.
+    \item \textbf{Formato de Estado}: Cada localização mapeada no piso é definida por um símbolo. Exemplo: $s \in \{A, B, C, \dots, T\}$.
+    \item \textbf{Início}: A partida ocorre na célula $A$.
+    \item \textbf{Encerramento}: Chega-se ao fim se e somente se $s = T$.
+    \item \textbf{Regras de Transição}: Vizinhos disponíveis e seus pedágios de travessia. Por exemplo: $Vizinhos(A) = \{(B, 2), (C, 4), (D, 3)\}$.
+    \item \textbf{Cálculo de Custos ($g$)}: O valor $g(n)$ rastreia o peso acumulado de todas as rotas percorridas desde o nó base $A$ até o destino local $n$.
+    \item \textbf{Impacto da Heurística ($h$)}: Representação de um "palpite instruído" do esforço restante de $n$ até $T$. No A*, a subestimação estrita do verdadeiro custo ($h(n) \le h^*(n)$) confere à heurística o status de "admissível", travando a rota como matematicamente perfeita (ótima).
 \end{itemize}
 
-\subsection*{B) Execução do Algoritmo Greedy Best-First Search}
+\subsection*{B) Avaliação com Greedy Best-First Search}
 
-A busca gulosa utiliza apenas o valor heurístico para decidir o próximo nó: $f(n) = h(n)$.
+A tática gulosa guia as decisões avaliando cegamente $f(n) = h(n)$, ignorando pedágios já pagos.
 
-\textbf{Métricas da Solução Greedy:}
+\textbf{Desempenho (Greedy):}
 \begin{itemize}
-    \item \textbf{Caminho Solução:} A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T
-    \item \textbf{Custo Final:} 19
-    \item \textbf{Nós Expandidos:} 5
-    \item \textbf{Nós Gerados:} 9
+    \item \textbf{Trilha Encontrada:} A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T
+    \item \textbf{Custo Acumulado:} 19
+    \item \textbf{Quantia de Nós Expandidos:} 5
+    \item \textbf{Quantia de Nós Gerados:} 9
 \end{itemize}
 
-\textbf{Tabela de Execução (Prioridade por $h(n)$):}
+\textbf{Passo-a-Passo Guloso:}
 \begin{table}[h!]
 \centering
 \small
 \begin{tabular}{|c|c|c|l|}
 \hline
-\textbf{Passo} & \textbf{Nó Exp.} & \textbf{$h(n)$} & \textbf{Conteúdo da Fronteira (Ordenada por $h$)} \\ \hline
+\textbf{Turno} & \textbf{Expansão} & \textbf{$h(n)$} & \textbf{Fila Prioritária por $h$} \\ \hline
 1 & A & 10 & [C(7), B(8), D(9)] \\ \hline
 2 & C & 7 & [H(4), G(6), B(8), D(9)] \\ \hline
 3 & H & 4 & [O(1), N(4), G(6), B(8), D(9)] \\ \hline
 4 & O & 1 & [T(0), N(4), G(6), B(8), D(9)] \\ \hline
-5 & T & 0 & Objetivo Alcançado \\ \hline
+5 & T & 0 & Concluído com sucesso \\ \hline
 \end{tabular}
-\caption{Rastreio da Busca Gulosa (Greedy Best-First Search)}
 \end{table}
 
-\textbf{Árvore de Busca (Greedy):}
-\textit{Legenda: Nós em azul (\textcolor{blue!70}{azul}) foram expandidos. O objetivo está em verde (\textcolor{green!60!black}{verde}).}
+\textbf{Árvore de Exploração Parcial (Greedy):}
+\textit{Preenchimento roxo (\textcolor{purple}{Cor}) para explorados. Verde (\textcolor{teal}{Cor}) para o nó final.}
 
 \begin{center}
 \begin{tikzpicture}[level distance=1.5cm,
@@ -51,14 +50,14 @@ A busca gulosa utiliza apenas o valor heurístico para decidir o próximo nó: $
   level 3/.style={sibling distance=1.2cm},
   every node/.style={circle, draw, minimum size=0.8cm, inner sep=1pt}]
   
-  \node[fill=blue!20, label=right:{\scriptsize 10}] {A}
+  \node[fill=purple!20, label=right:{\scriptsize 10}] {A}
     child {node[label=left:{\scriptsize 8}] {B}}
-    child {node[fill=blue!20, label=left:{\scriptsize 7}] {C}
+    child {node[fill=purple!20, label=left:{\scriptsize 7}] {C}
         child {node[label=left:{\scriptsize 6}] {G}}
-        child {node[fill=blue!20, label=right:{\scriptsize 4}] {H}
+        child {node[fill=purple!20, label=right:{\scriptsize 4}] {H}
             child {node[label=left:{\scriptsize 4}] {N}}
-            child {node[fill=blue!20, label=right:{\scriptsize 1}] {O}
-                child {node[fill=green!40, label=right:{\scriptsize 0}] {T}}
+            child {node[fill=purple!20, label=right:{\scriptsize 1}] {O}
+                child {node[fill=teal!40, label=right:{\scriptsize 0}] {T}}
             }
         }
     }
@@ -67,25 +66,24 @@ A busca gulosa utiliza apenas o valor heurístico para decidir o próximo nó: $
 \end{center}
 
 \newpage
-\subsection*{C) Execução do Algoritmo A*}
+\subsection*{C) Avaliação com Algoritmo A*}
 
-O A* utiliza a função de avaliação $f(n) = g(n) + h(n)$.
+A* equilibra os pesos do passado e previsões futuras: $f(n) = g(n) + h(n)$.
 
-\textbf{Métricas da Solução A*:}
+\textbf{Desempenho (A*):}
 \begin{itemize}
-    \item \textbf{Caminho Solução:} A $\rightarrow$ B $\rightarrow$ F $\rightarrow$ K $\rightarrow$ R $\rightarrow$ T
-    \item \textbf{Custo Final:} 17
-    \item \textbf{Nós Expandidos:} 20
-    \item \textbf{Nós Gerados:} 21
+    \item \textbf{Trilha Encontrada:} A $\rightarrow$ B $\rightarrow$ F $\rightarrow$ K $\rightarrow$ R $\rightarrow$ T
+    \item \textbf{Custo Acumulado:} 17
+    \item \textbf{Quantia de Nós Expandidos:} 20
 \end{itemize}
 
-\textbf{Tabela de Execução A*:}
+\textbf{Passo-a-Passo A*:}
 \begin{table}[h!]
 \centering
 \scriptsize
 \begin{tabular}{|c|c|c|c|c|l|l|}
 \hline
-\textbf{Passo} & \textbf{Nó} & \textbf{$g(n)$} & \textbf{$h(n)$} & \textbf{$f(n)$} & \textbf{Fronteira (Nó:f)} & \textbf{Caminho Parcial} \\ \hline
+\textbf{Trn} & \textbf{Nó} & \textbf{$g$} & \textbf{$h$} & \textbf{$f$} & \textbf{Fila (Nó:f)} & \textbf{Rota} \\ \hline
 1 & A & 0 & 10 & 10 & [B:10, C:11, D:12] & A \\ \hline
 2 & B & 2 & 8 & 10 & [C:11, E:11, D:12, F:12] & A-B \\ \hline
 3 & C & 4 & 7 & 11 & [E:11, D:12, F:12, G:14, H:14] & A-C \\ \hline
@@ -105,12 +103,12 @@ O A* utiliza a função de avaliação $f(n) = g(n) + h(n)$.
 17 & S & 16 & 1 & 17 & [T:17, L:18, P:18] & A-C-G-M-S \\ \hline
 18 & L & 12 & 6 & 18 & [T:17, P:18] & A-B-F-L \\ \hline
 19 & P & 10 & 8 & 18 & [T:17] & A-D-I-P \\ \hline
-20 & T & 17 & 0 & 17 & Objetivo Alcançado & A-B-F-K-R-T \\ \hline
+20 & T & 17 & 0 & 17 & Sucesso & A-B-F-K-R-T \\ \hline
 \end{tabular}
 \end{table}
 
-\textbf{Árvore de Busca (A*):}
-\textit{Legenda: Nós em azul (\textcolor{blue!70}{azul}) foram expandidos. O caminho ótimo em verde (\textcolor{green!60!black}{verde}).}
+\textbf{Árvore de Exploração Parcial (A*):}
+\textit{Legenda: Expansões em roxo (\textcolor{purple}{Cor}). Trilha perfeita em negrito com tom verde-escuro.}
 
 \begin{center}
 \begin{tikzpicture}[level distance=1.3cm,
@@ -119,72 +117,53 @@ O A* utiliza a função de avaliação $f(n) = g(n) + h(n)$.
   level 3/.style={sibling distance=1cm},
   every node/.style={circle, draw, minimum size=0.7cm, inner sep=1pt}]
   
-  \node[fill=blue!20, font=\bfseries\color{green!60!black}] {A}
-    child {node[fill=blue!20, font=\bfseries\color{green!60!black}] {B}
-      child {node[fill=blue!20] {E} child {node[fill=blue!20] {J} child {node[fill=blue!20] {Q}}}}
-      child {node[fill=blue!20, font=\bfseries\color{green!60!black}] {F} 
-        child {node[fill=blue!20, font=\bfseries\color{green!60!black}] {K} child {node[fill=blue!20, font=\bfseries\color{green!60!black}] {R} child {node[fill=green!40] {T}}}}
-        child {node[fill=blue!20] {L}}
+  \node[fill=purple!20, font=\bfseries\color{teal!60!black}] {A}
+    child {node[fill=purple!20, font=\bfseries\color{teal!60!black}] {B}
+      child {node[fill=purple!20] {E} child {node[fill=purple!20] {J} child {node[fill=purple!20] {Q}}}}
+      child {node[fill=purple!20, font=\bfseries\color{teal!60!black}] {F} 
+        child {node[fill=purple!20, font=\bfseries\color{teal!60!black}] {K} child {node[fill=purple!20, font=\bfseries\color{teal!60!black}] {R} child {node[fill=teal!40] {T}}}}
+        child {node[fill=purple!20] {L}}
       }
     }
-    child {node[fill=blue!20] {C}
-      child {node[fill=blue!20] {G} child {node[fill=blue!20] {M} child {node[fill=blue!20] {S} child {node {T}}}}}
-      child {node[fill=blue!20] {H} child {node[fill=blue!20] {N}} child {node[fill=blue!20] {O} child {node {T}}}}
+    child {node[fill=purple!20] {C}
+      child {node[fill=purple!20] {G} child {node[fill=purple!20] {M} child {node[fill=purple!20] {S} child {node {T}}}}}
+      child {node[fill=purple!20] {H} child {node[fill=purple!20] {N}} child {node[fill=purple!20] {O} child {node {T}}}}
     }
-    child {node[fill=blue!20] {D}
-      child {node[fill=blue!20] {I} child {node[fill=blue!20] {P}}}
+    child {node[fill=purple!20] {D}
+      child {node[fill=purple!20] {I} child {node[fill=purple!20] {P}}}
     };
 \end{tikzpicture}
 \end{center}
 
-\subsection*{D) Experimento Adicional: Heurísticas Modificadas}
+\subsection*{D) Experimento: Distorção das Heurísticas}
 
-Foram alterados os valores de $h(n)$ para três nós:
+Injetamos erros nos sensores de estimativa:
 \begin{itemize}
-    \item $h(D) = 1$ (original era 9)
-    \item $h(I) = 0$ (original era 7)
-    \item $h(B) = 20$ (original era 8)
+    \item $h(D)$ alterado para $2$
+    \item $h(I)$ alterado para $1$
+    \item $h(B)$ alterado de 8 para $22$
 \end{itemize}
 
-\textbf{Novos Resultados:}
+\textbf{Comparativo do Impacto:}
 \begin{table}[h!]
 \centering
 \begin{tabular}{|l|l|c|c|}
 \hline
-\textbf{Algoritmo} & \textbf{Caminho Encontrado} & \textbf{Custo} & \textbf{Nós Exp.} \\ \hline
-Greedy (Orig.) & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T & 19 & 5 \\ \hline
-Greedy (Mod.) & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T & 19 & 7 \\ \hline
-A* (Orig.) & A $\rightarrow$ B $\rightarrow$ F $\rightarrow$ K $\rightarrow$ R $\rightarrow$ T & 17 & 20 \\ \hline
-A* (Mod.) & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T & 19 & 12 \\ \hline
+\textbf{Abordagem} & \textbf{Rota Consolidada} & \textbf{Preço} & \textbf{Expansões} \\ \hline
+Guloso (Padrão) & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T & 19 & 5 \\ \hline
+Guloso (Corrompido) & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T & 19 & 7 \\ \hline
+A* (Padrão) & A $\rightarrow$ B $\rightarrow$ F $\rightarrow$ K $\rightarrow$ R $\rightarrow$ T & 17 & 20 \\ \hline
+A* (Corrompido) & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T & 19 & 13 \\ \hline
 \end{tabular}
 \end{table}
 
-\textbf{Análise do Impacto:}
-\begin{enumerate}[label=\alph*)]
-    \item \textbf{A solução encontrada mudou?} Para o Greedy não, mas para o A* sim.
-    \item \textbf{O custo da solução mudou?} Para o A* sim (subiu de 17 para 19), pois a heurística enganosa em $B$ o afastou do caminho ótimo real.
-    \item \textbf{A busca gulosa encontrou solução ótima?} Não, encontrou custo 19 (o ótimo é 17).
-    \item \textbf{O A* encontrou solução ótima?} Não neste experimento, pois a heurística modificada para $B$ tornou-se \textbf{não-admissível} (superestimou drasticamente o custo real), quebrando a garantia de otimalidade.
-    \item \textbf{Qual algoritmo expandiu menos nós?} A Busca Gulosa (7 nós contra 12 do A* no experimento).
-    \item \textbf{Qual algoritmo foi mais sensível à heurística?} A Busca Gulosa é inerentemente mais sensível pois depende exclusivamente de $h(n)$. No entanto, o A* sofreu uma mudança drástica de comportamento (mudança de caminho) devido à violação da admissibilidade.
+\textbf{Síntese dos Efeitos:}
+\begin{enumerate}[label=\roman*)]
+    \item A rota A* degenerou, abandonando o caminho ideal (17) por um sub-ótimo (19).
+    \item A causa direta da falha do A* reside no fato de $h(B)=22$ ser uma superestimativa extrema, violando a prova matemática de admissibilidade do A*.
+    \item A pesquisa Gulosa reagiu vagamente nos fundos falsos (testou D primeiro pois $h=2$), mas em geral re-encontrou a mesma trilha sub-ótima sem maiores prejuízos lógicos.
 \end{enumerate}
 
-\subsection*{E) Discussão e Comparação Teórica}
+\subsection*{E) Conclusões Gerais}
 
-\begin{table}[h!]
-\centering
-\resizebox{\textwidth}{!}{
-\begin{tabular}{|p{3.5cm}|p{5cm}|p{5cm}|}
-\hline
-\textbf{Critério} & \textbf{Greedy Best-First Search} & \textbf{Busca A*} \\ \hline
-\textbf{Completude} & Sim (em grafos finitos com detecção de ciclos) & Sim \\ \hline
-\textbf{Otimalidade} & Não & Sim (se $h(n)$ for admissível) \\ \hline
-\textbf{Consumo de Memória} & Alto (mantém todos os nós na fronteira) & Muito Alto (pode ser exponencial) \\ \hline
-\textbf{Dependência da Heurística} & Total (f(n) = h(n)) & Equilibrada (f(n) = g(n) + h(n)) \\ \hline
-\textbf{Qualidade das Soluções} & Frequentemente sub-ótima & Ótima (garantida) \\ \hline
-\textbf{Comportamento em Grafos Grandes} & Rápida, mas arriscada & Lenta, mas precisa \\ \hline
-\end{tabular}
-}
-\end{table}
-
-\textbf{Conclusão:} Enquanto a Busca Gulosa tenta "ir direto ao ponto" ignorando o custo já gasto ($g(n)$), ela é propensa a erros graves em labirintos ou mapas com obstáculos. O A* corrige isso balanceando o progresso real com a estimativa futura, sendo o padrão ouro para busca de caminho, desde que a heurística seja admissível e consistente.
+O A* é incontestável como líder em confiabilidade para malhas difíceis. Enquanto a busca gulosa desce rapidamente rampa abaixo (frequentemente trombando em obstáculos e achando percursos longos em forma de $U$), o A* se resguarda conferindo $g(n)$, e é o único blindado com garantias matemáticas de otimalidade na literatura, condicionada à pureza de seu estimador heurístico $h(n)$.
