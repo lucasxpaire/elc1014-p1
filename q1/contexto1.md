@@ -19,20 +19,37 @@ Grafo do problema (Sala -> Salas vizinhas em ordem obrigatória):
 A -> B, C, D
 B -> E, F
 C -> G, H
-D -> I, J
-E -> K, L
-H -> M
-G -> N, O
-J -> P
+D -> I
+E -> J
+F -> K, L
+G -> M
+H -> N, O
+I -> P
+J -> -
+K -> Q
+L -> -
+M -> R
+N -> -
+O -> S
+P -> -
+Q -> -
+R -> -
+S -> -
 
 Estado inicial: A
 Estado objetivo: S (Nota: Se o nó S não existe nas conexões descritas ou não é alcançável, declare isso na sua resposta de forma clara e lide com a busca até esgotar a fronteira ou atingir os limites do algoritmo).
 
-A) Formule o problema como um problema de busca em espaço de estados: defina representação do estado, estado inicial, teste de objetivo, função sucessora, função de custo e representação em Python.
-B) Resolva utilizando Busca em Amplitude (BFS), Busca em Profundidade (DFS) e Busca Iterativa em Profundidade (IDS). Para cada um, apresente: a ordem completa de expansão, conteúdo da fronteira após cada expansão, árvore parcial de busca, caminho solução, profundidade, custo, nós gerados e nós expandidos. Preencha a tabela de passos exigida.
+A) Formule o problema como um problema de busca em espaço de estados: defina representação formal do estado, estado inicial, teste de objetivo, função sucessora, função de custo e representação em Python.
+B) Resolva utilizando Busca em Amplitude (BFS), Busca em Profundidade (DFS) e Busca Iterativa em Profundidade (IDS). Para cada um, apresente: a ordem completa de expansão, conteúdo da fronteira após cada expansão, árvore parcial de busca, caminho solução, profundidade da solução, custo da solução, quantidade de nós gerados e quantidade de nós expandidos. Preencha a tabela de passos exigida, seguindo o exemplo abaixo:
+[INÍCIO DO EXEMPLO DE TABELA]
+Colunas: Passo, Nó Expandido, Conteúdo da Fronteira
+Exemplo de linha da tabela: 1, A, [B, C, D]
+
+[FIM DO EXEMPLO DE TABELA]
+
 C) Implemente os três algoritmos em Python (sem libs externas).
-D) Experimento: modifique a ordem dos sucessores de dois nós, execute os algoritmos novamente, compare os resultados e analise o impacto. Responda as perguntas a-e da prova sobre o experimento.
-E) Por fim, compare os algoritmos considerando completude, otimalidade, complexidades e adequação.
+D) Experimento: modifique a ordem dos sucessores de dois nós, por exemplo de C -> G, H para C -> H, G, execute os algoritmos novamente, compare os resultados e analise o impacto. Responda as perguntas a-e da prova sobre o experimento.
+E) Por fim, compare os algoritmos considerando completude, otimalidade, complexidade de tempo, complexidade de espaço, dependência da ordem dos sucessores, comportamento em árvores profundas, adequação para problemas grandes.
 [FIM DO TEXTO DA QUESTÃO]
 
-Entregue APENAS o código LaTeX formatado.
+Entregue o código LaTeX formatado, bem como os scripts do Python.
