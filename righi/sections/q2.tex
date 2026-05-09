@@ -1,0 +1,422 @@
+\section{Questao 2 - Greedy Best-First Search e A*}
+
+\subsection{Formulacao do problema em espaco de estados}
+\[
+P = \langle Z, \mathcal{A}, T, z_0, G, c, h \rangle
+\]
+\begin{itemize}[leftmargin=1.5em]
+  \item $Z$: conjunto de estados (nos do grafo), $Z=\{A,B,C,\dots,T\}$.
+  \item $z_0=A$: estado inicial.
+  \item Objetivo: alcancar o estado $T$.
+  \item $T(\cdot)$: funcao de transicao segundo as arestas dirigidas do enunciado.
+  \item $c(z,a,z')$: custo da aresta percorrida.
+  \item $h(z)$: heuristica fornecida no enunciado (estimativa ate $T$).
+\end{itemize}
+
+\subsection{Dados do grafo e heuristica}
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l l c}
+\toprule
+No & Sucessores (custo) & $h(n)$ \\
+\midrule
+A & B(2), C(4), D(3) & 10 \\
+B & E(3), F(5) & 8 \\
+C & G(4), H(6) & 7 \\
+D & I(2) & 9 \\
+E & J(4) & 6 \\
+F & K(3), L(5) & 5 \\
+G & M(6) & 6 \\
+H & N(3), O(4) & 4 \\
+I & P(5) & 7 \\
+J & Q(4) & 5 \\
+K & R(3) & 3 \\
+L & - & 6 \\
+M & S(2) & 3 \\
+N & - & 4 \\
+O & T(5) & 1 \\
+P & - & 8 \\
+Q & - & 4 \\
+R & T(4) & 2 \\
+S & T(3) & 1 \\
+T & - & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Grafo da Q2 e valores heuristicos}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Latex,
+  x=1cm, y=1cm,
+  room/.style={circle, draw=black, minimum size=8mm, inner sep=1pt, font=\small},
+  cost/.style={font=\scriptsize, fill=white, inner sep=1pt}
+]
+  \node[room] (A) at (0,0) {A};
+
+  \node[room] (B) at (2,3) {B};
+  \node[room] (C) at (2,0) {C};
+  \node[room] (D) at (2,-3) {D};
+
+  \node[room] (E) at (4,4.5) {E};
+  \node[room] (F) at (4,2.5) {F};
+  \node[room] (G) at (4,0.5) {G};
+  \node[room] (H) at (4,-1.5) {H};
+  \node[room] (I) at (4,-3.5) {I};
+
+  \node[room] (J) at (6,5.0) {J};
+  \node[room] (K) at (6,3.0) {K};
+  \node[room] (L) at (6,1.0) {L};
+  \node[room] (M) at (6,-0.5) {M};
+  \node[room] (N) at (6,-2.0) {N};
+  \node[room] (O) at (6,-3.5) {O};
+  \node[room] (P) at (6,-5.0) {P};
+
+  \node[room] (Q) at (8,5.0) {Q};
+  \node[room] (R) at (8,2.5) {R};
+  \node[room] (S) at (7.1,-0.5) {S};
+  \node[room, draw=green!50!black, very thick] (T) at (8,-3.5) {T};
+
+  \draw[->] (A) -- node[cost, pos=.55, above] {2} (B);
+  \draw[->] (A) -- node[cost, pos=.55, above] {4} (C);
+  \draw[->] (A) -- node[cost, pos=.55, below] {3} (D);
+
+  \draw[->] (B) -- node[cost, pos=.55, above] {3} (E);
+  \draw[->] (B) -- node[cost, pos=.55, below] {5} (F);
+  \draw[->] (C) -- node[cost, pos=.55, above] {4} (G);
+  \draw[->] (C) -- node[cost, pos=.55, below] {6} (H);
+  \draw[->] (D) -- node[cost, pos=.55, below] {2} (I);
+
+  \draw[->] (E) -- node[cost, pos=.55, above] {4} (J);
+  \draw[->] (F) -- node[cost, pos=.55, above] {3} (K);
+  \draw[->] (F) -- node[cost, pos=.55, below] {5} (L);
+  \draw[->] (G) -- node[cost, pos=.55, above] {6} (M);
+  \draw[->] (H) -- node[cost, pos=.55, above] {3} (N);
+  \draw[->] (H) -- node[cost, pos=.55, below] {4} (O);
+  \draw[->] (I) -- node[cost, pos=.55, below] {5} (P);
+
+  \draw[->] (J) -- node[cost, pos=.55, above] {4} (Q);
+  \draw[->] (K) -- node[cost, pos=.55, above] {3} (R);
+  \draw[->] (M) -- node[cost, pos=.55, above] {2} (S);
+
+  \draw[->] (R) to[bend left=18] node[cost, pos=.52, left] {4} (T);
+  \draw[->] (S) -- node[cost, pos=.52, left] {3} (T);
+  \draw[->] (O) -- node[cost, pos=.55, above] {5} (T);
+\end{tikzpicture}
+\caption{Representacao do grafo dirigido da Q2 (custos nas arestas)}
+\end{figure}
+
+\textbf{Desempate adotado na implementacao:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Menor prioridade primeiro ($h$ no Greedy, $f=g+h$ no A*).
+  \item No Greedy, o custo acumulado $g(n)$ nao participa da prioridade.
+  \item Em empate, ordem de insercao na fronteira.
+\end{itemize}
+
+\subsection{Greedy Best-First Search ($f(n)=h(n)$)}
+\textbf{Arvore de exploracao manual (Greedy):}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Latex,
+  x=1cm, y=1cm,
+  n/.style={circle, draw=black, minimum size=9mm, inner sep=1pt, align=center, font=\small},
+  pathn/.style={n, fill=blue!12, draw=blue!70!black, very thick},
+  oth/.style={n, fill=gray!14, draw=gray!60!black},
+  w/.style={font=\scriptsize, fill=white, inner sep=1pt}
+]
+  \node[pathn] (A) at (0,0)      {A\\{\tiny 1}};
+  \node[oth]   (B) at (-3,-1.8)  {B};
+  \node[pathn] (C) at (0,-1.8)   {C\\{\tiny 2}};
+  \node[oth]   (D) at (3,-1.8)   {D};
+  \node[oth]   (G) at (-1.2,-3.6){G};
+  \node[pathn] (H) at (1.2,-3.6) {H\\{\tiny 3}};
+  \node[oth]   (N) at (0,-5.4)   {N};
+  \node[pathn] (O) at (2.4,-5.4) {O\\{\tiny 4}};
+  \node[pathn] (T) at (2.4,-7.2) {T\\{\tiny 5}};
+
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, above] {2} (B);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (A) -- node[w, pos=.55, right] {4} (C);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, above] {3} (D);
+  \draw[->, draw=gray!65] (C) -- node[w, pos=.55, above] {4} (G);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (C) -- node[w, pos=.55, above] {6} (H);
+  \draw[->, draw=gray!65] (H) -- node[w, pos=.55, above] {3} (N);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (H) -- node[w, pos=.55, above] {4} (O);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (O) -- node[w, pos=.55, right] {5} (T);
+\end{tikzpicture}
+\caption{Arvore do Greedy ate encontrar $T$ (azul = caminho solucao)}
+\end{figure}
+
+\begin{longtable}{c c c p{5.2cm} p{3.4cm}}
+\toprule
+Passo & No & $h(n)$ & Fronteira ordenada por $h$ & Caminho parcial \\
+\midrule
+1 & A & 10 & [C(7), B(8), D(9)] & A \\
+2 & C & 7 & [H(4), G(6), B(8), D(9)] & A $\rightarrow$ C \\
+3 & H & 4 & [O(1), N(4), G(6), B(8), D(9)] & A $\rightarrow$ C $\rightarrow$ H \\
+4 & O & 1 & [T(0), N(4), G(6), B(8), D(9)] & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O \\
+5 & T & 0 & [N(4), G(6), B(8), D(9)] & A $\rightarrow$ C $\rightarrow$ H $\rightarrow$ O $\rightarrow$ T \\
+\bottomrule
+\end{longtable}
+
+\textbf{Resultado Greedy:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Ordem de expansao: $[A,C,H,O,T]$.
+  \item Caminho solucao: $A \rightarrow C \rightarrow H \rightarrow O \rightarrow T$.
+  \item Profundidade: 4.
+  \item Custo final: 19.
+  \item Nos gerados: 9.
+  \item Nos expandidos: 5.
+\end{itemize}
+
+\subsection{A* ($f(n)=g(n)+h(n)$)}
+\textbf{Arvore de exploracao manual (A*):}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Latex,
+  x=1cm, y=1cm,
+  n/.style={circle, draw=black, minimum size=10.5mm, inner sep=0.8pt, align=center, font=\scriptsize},
+  pathv/.style={n, fill=blue!12, draw=red!80!black, very thick},
+  vis/.style={n, fill=gray!14, draw=red!80!black, line width=0.9pt},
+  unv/.style={n, fill=gray!14, draw=gray!60!black},
+  w/.style={font=\scriptsize, fill=white, inner sep=1pt}
+]
+  \node[pathv] (A) at (0,0)       {A\\{\tiny o1}\\{\tiny g0,f10}};
+  \node[pathv] (B) at (2,2.5)     {B\\{\tiny o2}\\{\tiny g2,f10}};
+  \node[vis]   (C) at (2,0.5)     {C\\{\tiny o3}\\{\tiny g4,f11}};
+  \node[vis]   (D) at (2,-1.5)    {D\\{\tiny o5}\\{\tiny g3,f12}};
+
+  \node[vis]   (E) at (4,3.5)     {E\\{\tiny o4}\\{\tiny g5,f11}};
+  \node[pathv] (F) at (4,2.0)     {F\\{\tiny o7}\\{\tiny g7,f12}};
+  \node[vis]   (G) at (4,0.5)     {G\\{\tiny o9}\\{\tiny g8,f14}};
+  \node[vis]   (H) at (4,-1.0)    {H\\{\tiny o11}\\{\tiny g10,f14}};
+  \node[vis]   (I) at (4,-2.5)    {I\\{\tiny o6}\\{\tiny g5,f12}};
+
+  \node[vis]   (J) at (6,4.0)     {J\\{\tiny o10}\\{\tiny g9,f14}};
+  \node[pathv] (K) at (6,2.6)     {K\\{\tiny o8}\\{\tiny g10,f13}};
+  \node[unv]   (L) at (6,1.2)     {L\\{\tiny g12,f18}};
+  \node[vis]   (M) at (6,-0.1)    {M\\{\tiny o16}\\{\tiny g14,f17}};
+  \node[vis]   (N) at (6,-1.4)    {N\\{\tiny o15}\\{\tiny g13,f17}};
+  \node[vis]   (O) at (6,-2.7)    {O\\{\tiny o13}\\{\tiny g14,f15}};
+  \node[unv]   (P) at (6,-4.0)    {P\\{\tiny g10,f18}};
+
+  \node[vis]   (Q) at (8.2,4.0)   {Q\\{\tiny o14}\\{\tiny g13,f17}};
+  \node[pathv] (R) at (8.2,2.6)   {R\\{\tiny o12}\\{\tiny g13,f15}};
+  \node[vis]   (S) at (7.75,-0.25){S\\{\tiny o17}\\{\tiny g16,f17}};
+  \node[pathv] (T) at (8.6,-2.7)  {T\\{\tiny o18}\\{\tiny g17,f17}};
+
+  \draw[->, draw=blue!70!black, line width=0.9pt] (A) -- node[w, pos=.55, above] {2} (B);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, above] {4} (C);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, below] {3} (D);
+  \draw[->, draw=gray!65] (B) -- node[w, pos=.55, above] {3} (E);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (B) -- node[w, pos=.55, below] {5} (F);
+  \draw[->, draw=gray!65] (C) -- node[w, pos=.55, above] {4} (G);
+  \draw[->, draw=gray!65] (C) -- node[w, pos=.55, below] {6} (H);
+  \draw[->, draw=gray!65] (D) -- node[w, pos=.55, below] {2} (I);
+  \draw[->, draw=gray!65] (E) -- node[w, pos=.55, above] {4} (J);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (F) -- node[w, pos=.55, above] {3} (K);
+  \draw[->, draw=gray!65] (F) -- node[w, pos=.55, below] {5} (L);
+  \draw[->, draw=gray!65] (G) -- node[w, pos=.55, above] {6} (M);
+  \draw[->, draw=gray!65] (H) -- node[w, pos=.55, above] {3} (N);
+  \draw[->, draw=gray!65] (H) -- node[w, pos=.55, below] {4} (O);
+  \draw[->, draw=gray!65] (I) -- node[w, pos=.55, below] {5} (P);
+  \draw[->, draw=gray!65] (J) -- node[w, pos=.55, above] {4} (Q);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (K) -- node[w, pos=.55, above] {3} (R);
+  \draw[->, draw=gray!65] (M) to[bend left=8] node[w, pos=.45, above] {2} (S);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (R) to[bend left=16] node[w, pos=.5, left] {4} (T);
+\end{tikzpicture}
+\caption{Arvore do A* (azul = caminho solucao; borda vermelha = no visitado; em cada no: ordem, g e f)}
+\end{figure}
+
+\begingroup
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{5pt}
+\small
+\begin{longtable}{c c c c c >{\raggedright\arraybackslash}p{5.2cm} >{\raggedright\arraybackslash}p{3.5cm}}
+\toprule
+Passo & No & $g(n)$ & $h(n)$ & $f(n)$ & Fronteira ordenada por $f$ & Caminho parcial \\
+\midrule
+1 & A & 0 & 10 & 10 & [B(10), C(11), D(12)] & A \\
+2 & B & 2 & 8 & 10 & [C(11), E(11), D(12), F(12)] & A$\rightarrow$B \\
+3 & C & 4 & 7 & 11 & [E(11), D(12), F(12), G(14), H(14)] & A$\rightarrow$C \\
+4 & E & 5 & 6 & 11 & [D(12), F(12), G(14), J(14), H(14)] & A$\rightarrow$B$\rightarrow$E \\
+5 & D & 3 & 9 & 12 & [I(12), F(12), G(14), J(14), H(14)] & A$\rightarrow$D \\
+6 & I & 5 & 7 & 12 & [F(12), G(14), J(14), H(14), P(18)] & A$\rightarrow$D$\rightarrow$I \\
+7 & F & 7 & 5 & 12 & [K(13), G(14), J(14), H(14), P(18), L(18)] & A$\rightarrow$B$\rightarrow$F \\
+8 & K & 10 & 3 & 13 & [G(14), J(14), H(14), R(15), P(18), L(18)] & A$\rightarrow$B$\rightarrow$F$\rightarrow$K \\
+9 & G & 8 & 6 & 14 & [J(14), H(14), R(15), M(17), P(18), L(18)] & A$\rightarrow$C$\rightarrow$G \\
+10 & J & 9 & 5 & 14 & [H(14), R(15), Q(17), M(17), P(18), L(18)] & A$\rightarrow$B$\rightarrow$E$\rightarrow$J \\
+11 & H & 10 & 4 & 14 & [R(15), O(15), N(17), Q(17), M(17), P(18), L(18)] & A$\rightarrow$C$\rightarrow$H \\
+12 & R & 13 & 2 & 15 & [O(15), N(17), Q(17), M(17), T(17), P(18), L(18)] & A$\rightarrow$B$\rightarrow$F$\rightarrow$K$\rightarrow$R \\
+13 & O & 14 & 1 & 15 & [N(17), Q(17), M(17), T(17), P(18), L(18)] & A$\rightarrow$C$\rightarrow$H$\rightarrow$O \\
+14 & Q & 13 & 4 & 17 & [N(17), M(17), T(17), P(18), L(18)] & A$\rightarrow$B$\rightarrow$E$\rightarrow$J$\rightarrow$Q \\
+15 & N & 13 & 4 & 17 & [M(17), T(17), P(18), L(18)] & A$\rightarrow$C$\rightarrow$H$\rightarrow$N \\
+16 & M & 14 & 3 & 17 & [S(17), T(17), P(18), L(18)] & A$\rightarrow$C$\rightarrow$G$\rightarrow$M \\
+17 & S & 16 & 1 & 17 & [T(17), P(18), L(18)] & A$\rightarrow$C$\rightarrow$G$\rightarrow$M$\rightarrow$S \\
+18 & T & 17 & 0 & 17 & [P(18), L(18)] & A$\rightarrow$B$\rightarrow$F$\rightarrow$K$\rightarrow$R$\rightarrow$T \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\textbf{Resultado A*:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Ordem de expansao: $[A,B,C,E,D,I,F,K,G,J,H,R,O,Q,N,M,S,T]$.
+  \item Caminho solucao: $A \rightarrow B \rightarrow F \rightarrow K \rightarrow R \rightarrow T$.
+  \item Profundidade: 5.
+  \item Custo final: 17.
+  \item Nos gerados: 20.
+  \item Nos expandidos: 18.
+\end{itemize}
+
+\subsection{Experimento: alterar heuristica de exatamente 3 nos}
+\textbf{Alteracoes aplicadas:}
+\begin{table}[H]
+\centering
+\begin{tabular}{c c c}
+\toprule
+No & $h$ original & $h$ novo \\
+\midrule
+B & 8 & 2 \\
+H & 4 & 8 \\
+G & 6 & 10 \\
+\bottomrule
+\end{tabular}
+\caption{Heuristicas alteradas no experimento}
+\end{table}
+
+\textbf{Reexecucao com heuristica modificada:}
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.4cm} >{\raggedright\arraybackslash}p{4.4cm} c c c >{\raggedright\arraybackslash}p{2.4cm}}
+\toprule
+Algoritmo & Caminho & Custo & Gerados & Expandidos & Observacao \\
+\midrule
+Greedy (original) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow T$ & 19 & 9 & 5 & nao otimo \\
+Greedy (modificado) & $A \rightarrow B \rightarrow F \rightarrow K \rightarrow R \rightarrow T$ & 17 & 10 & 6 & passou a otimo \\
+\midrule
+A* (original) & $A \rightarrow B \rightarrow F \rightarrow K \rightarrow R \rightarrow T$ & 17 & 20 & 18 & otimo \\
+A* (modificado) & $A \rightarrow B \rightarrow F \rightarrow K \rightarrow R \rightarrow T$ & 17 & 16 & 12 & mesmo otimo, menos expansoes \\
+\bottomrule
+\end{tabular}
+\caption{Impacto da alteracao de heuristicas}
+\end{table}
+
+\textbf{Arvores do experimento (heuristica modificada):}
+
+\textit{Greedy modificado:}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Latex,
+  x=1cm, y=1cm,
+  n/.style={circle, draw=black, minimum size=9mm, inner sep=1pt, align=center, font=\small},
+  pathn/.style={n, fill=blue!12, draw=blue!70!black, very thick},
+  oth/.style={n, fill=gray!14, draw=gray!60!black},
+  w/.style={font=\scriptsize, fill=white, inner sep=1pt}
+]
+  \node[pathn] (A) at (0,0)      {A\\{\tiny 1}};
+  \node[pathn] (B) at (2,1.7)    {B\\{\tiny 2}};
+  \node[oth]   (C) at (2,0)      {C};
+  \node[oth]   (D) at (2,-1.7)   {D};
+  \node[oth]   (E) at (4,2.3)    {E};
+  \node[pathn] (F) at (4,1.0)    {F\\{\tiny 3}};
+  \node[pathn] (K) at (6,1.6)    {K\\{\tiny 4}};
+  \node[oth]   (L) at (6,0.2)    {L};
+  \node[pathn] (R) at (8,1.6)    {R\\{\tiny 5}};
+  \node[pathn] (T) at (10,1.6)   {T\\{\tiny 6}};
+
+  \draw[->, draw=blue!70!black, line width=0.9pt] (A) -- node[w, pos=.55, above] {2} (B);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, above] {4} (C);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, below] {3} (D);
+  \draw[->, draw=gray!65] (B) -- node[w, pos=.55, above] {3} (E);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (B) -- node[w, pos=.55, below] {5} (F);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (F) -- node[w, pos=.55, above] {3} (K);
+  \draw[->, draw=gray!65] (F) -- node[w, pos=.55, below] {5} (L);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (K) -- node[w, pos=.55, above] {3} (R);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (R) -- node[w, pos=.55, above] {4} (T);
+\end{tikzpicture}
+\caption{Arvore do Greedy com heuristica modificada (azul = caminho solucao)}
+\end{figure}
+
+\textit{A* modificado:}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Latex,
+  x=1cm, y=1cm,
+  n/.style={circle, draw=black, minimum size=10.5mm, inner sep=0.8pt, align=center, font=\scriptsize},
+  pathv/.style={n, fill=blue!12, draw=red!80!black, very thick},
+  vis/.style={n, fill=gray!14, draw=red!80!black, line width=0.9pt},
+  unv/.style={n, fill=gray!14, draw=gray!60!black},
+  w/.style={font=\scriptsize, fill=white, inner sep=1pt}
+]
+  \node[pathv] (A) at (0,0)      {A\\{\tiny o1}\\{\tiny g0,f10}};
+  \node[pathv] (B) at (2,2.5)    {B\\{\tiny o2}\\{\tiny g2,f4}};
+  \node[vis]   (C) at (2,0.5)    {C\\{\tiny o3}\\{\tiny g4,f11}};
+  \node[vis]   (D) at (2,-1.5)   {D\\{\tiny o5}\\{\tiny g3,f12}};
+
+  \node[vis]   (E) at (4,3.5)    {E\\{\tiny o4}\\{\tiny g5,f11}};
+  \node[pathv] (F) at (4,2.0)    {F\\{\tiny o7}\\{\tiny g7,f12}};
+  \node[unv]   (G) at (4,0.5)    {G\\{\tiny g8,f18}};
+  \node[unv]   (H) at (4,-1.0)   {H\\{\tiny g10,f18}};
+  \node[vis]   (I) at (4,-2.5)   {I\\{\tiny o6}\\{\tiny g5,f12}};
+
+  \node[vis]   (J) at (6,4.0)    {J\\{\tiny o9}\\{\tiny g9,f14}};
+  \node[pathv] (K) at (6,2.6)    {K\\{\tiny o8}\\{\tiny g10,f13}};
+  \node[unv]   (L) at (6,1.2)    {L\\{\tiny g12,f18}};
+  \node[unv]   (P) at (6,-3.8)   {P\\{\tiny g10,f18}};
+
+  \node[vis]   (Q) at (8.2,4.0)  {Q\\{\tiny o11}\\{\tiny g13,f17}};
+  \node[pathv] (R) at (8.2,2.6)  {R\\{\tiny o10}\\{\tiny g13,f15}};
+  \node[pathv] (T) at (9.8,1.0)  {T\\{\tiny o12}\\{\tiny g17,f17}};
+
+  \draw[->, draw=blue!70!black, line width=0.9pt] (A) -- node[w, pos=.55, above] {2} (B);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, above] {4} (C);
+  \draw[->, draw=gray!65] (A) -- node[w, pos=.55, below] {3} (D);
+  \draw[->, draw=gray!65] (B) -- node[w, pos=.55, above] {3} (E);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (B) -- node[w, pos=.55, below] {5} (F);
+  \draw[->, draw=gray!65] (C) -- node[w, pos=.55, above] {4} (G);
+  \draw[->, draw=gray!65] (C) -- node[w, pos=.55, below] {6} (H);
+  \draw[->, draw=gray!65] (D) -- node[w, pos=.55, below] {2} (I);
+  \draw[->, draw=gray!65] (E) -- node[w, pos=.55, above] {4} (J);
+  \draw[->, draw=blue!70!black, line width=0.9pt] (F) -- node[w, pos=.55, above] {3} (K);
+  \draw[->, draw=gray!65] (F) -- node[w, pos=.55, below] {5} (L);
+  \draw[->, draw=gray!65] (I) -- node[w, pos=.55, below] {5} (P);
+  \draw[->, draw=gray!65] (J) -- node[w, pos=.55, above] {4} (Q);
+\draw[->, draw=blue!70!black, line width=0.9pt] (K) -- node[w, pos=.55, above] {3} (R);
+\draw[->, draw=blue!70!black, line width=0.9pt] (R) -- node[w, pos=.55, above] {4} (T);
+\end{tikzpicture}
+\caption{Arvore do A* com heuristica modificada (azul = caminho solucao; borda vermelha = no visitado)}
+\end{figure}
+
+\subsection{Respostas objetivas do experimento}
+\begin{itemize}[leftmargin=1.5em]
+  \item a) A solucao encontrada mudou? \textbf{Sim no Greedy} (mudou para o caminho otimo). \textbf{No A* nao}.
+  \item b) O custo da solucao mudou? \textbf{Sim no Greedy} (19 $\rightarrow$ 17). \textbf{No A* nao} (17 em ambos).
+  \item c) A busca gulosa encontrou solucao otima? \textbf{Antes: nao}. \textbf{Depois: sim} (neste experimento).
+  \item d) O A* encontrou solucao otima? \textbf{Sim}, antes e depois.
+  \item e) Qual algoritmo expandiu menos nos? \textbf{Greedy} (5 no original; 6 no modificado), contra 18 e 12 do A*.
+  \item f) Qual foi mais sensivel a heuristica? \textbf{Greedy}, pois alterou caminho e custo; no A* mudou principalmente eficiencia.
+\end{itemize}
+
+\subsection{Comparacao final: Greedy vs A*}
+\textbf{Notacao:}
+\[
+b = \text{fator de ramificacao},\quad d = \text{profundidade da solucao},\quad m = \text{profundidade maxima}.
+\]
+
+\begin{enumerate}[label=\alph*)]
+  \item \textbf{Completude}: Greedy nao e completo em geral; A* e completo em condicoes usuais (custos positivos e espaco finito/adequado).
+  \item \textbf{Otimalidade}: Greedy nao garante otimo; A* garante otimo com heuristica admissivel/consistente.
+  \item \textbf{Consumo de memoria}: ambos guardam fronteira ordenada; A* tende a manter mais estados por considerar custo acumulado.
+  \item \textbf{Dependencia da heuristica}: Greedy e altamente dependente; A* tambem depende, mas de forma mais robusta.
+  \item \textbf{Custo computacional}: Greedy costuma expandir menos quando a heuristica aponta bem; A* expande mais, mas com melhor garantia.
+  \item \textbf{Qualidade da solucao}: A* superior em garantia de qualidade; Greedy pode ser bom, mas pode errar caminho.
+  \item \textbf{Comportamento em grafos grandes}: Greedy pode ser rapido, porem arriscado; A* e mais confiavel, mas pode consumir muita memoria.
+\end{enumerate}

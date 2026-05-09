@@ -1,0 +1,958 @@
+\section{Questao 1 - BFS, DFS e Busca Iterativa em Profundidade}
+
+\subsection{Formulacao do problema em espaco de estados}
+\textbf{a) Definicao formal do estado}
+\[
+P = \langle Z, \mathcal{A}, T, s_0, G, c \rangle
+\]
+\begin{itemize}[leftmargin=1.5em]
+  \item $Z$: conjunto de estados (salas do predio), com
+  \[
+  Z=\{A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S\}.
+  \]
+  \item Cada estado $z \in Z$ representa a sala atual do agente.
+  \item $\mathcal{A}$: conjunto de acoes de deslocamento entre salas adjacentes.
+  \item $T$: funcao de transicao que leva da sala atual para uma sala vizinha valida.
+\end{itemize}
+
+\textbf{b) Estado inicial}
+\[
+s_0 = A
+\]
+
+\textbf{c) Teste de objetivo}
+\[
+G(z)=
+\begin{cases}
+\text{verdadeiro}, & \text{se } z=S \\
+\text{falso}, & \text{caso contrario}
+\end{cases}
+\]
+
+\textbf{d) Funcao sucessora}
+\begin{itemize}[leftmargin=1.5em]
+  \item A funcao sucessora devolve os vizinhos da sala atual respeitando a ordem obrigatoria do enunciado.
+  \item Exemplo: $\text{Suc}(A)=[B,C,D]$, $\text{Suc}(C)=[G,H]$, $\text{Suc}(F)=[K,L]$.
+\end{itemize}
+
+\textbf{e) Funcao de custo}
+\[
+c(z,a,z') = 1
+\]
+Cada movimento entre salas adjacentes tem custo unitario. Logo, o custo total de um caminho e o numero de arestas percorridas.
+
+\textbf{f) Representacao escolhida em Python}
+\begin{lstlisting}
+grafo = {
+    "A": ["B", "C", "D"],
+    "B": ["E", "F"],
+    "C": ["G", "H"],
+    "D": ["I"],
+    "E": ["J"],
+    "F": ["K", "L"],
+    "G": ["M"],
+    "H": ["N", "O"],
+    "I": ["P"],
+    "J": [],
+    "K": ["Q"],
+    "L": [],
+    "M": ["R"],
+    "N": [],
+    "O": ["S"],
+    "P": [],
+    "Q": [],
+    "R": [],
+    "S": [],
+}
+estado_inicial = "A"
+estado_objetivo = "S"
+\end{lstlisting}
+
+\subsection{Grafo definido no enunciado}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  node distance=10mm,
+  state/.style={draw, circle, minimum size=7mm, inner sep=0pt},
+  edge/.style={->, thick}
+]
+  % Nivel 0
+  \node[state] (A) at (0,0) {A};
+
+  % Nivel 1
+  \node[state] (B) at (2,2) {B};
+  \node[state] (C) at (2,0) {C};
+  \node[state] (D) at (2,-2) {D};
+
+  % Nivel 2
+  \node[state] (E) at (4,3) {E};
+  \node[state] (F) at (4,1.5) {F};
+  \node[state] (G) at (4,0) {G};
+  \node[state] (H) at (4,-1.5) {H};
+  \node[state] (I) at (4,-3) {I};
+
+  % Nivel 3
+  \node[state] (J) at (6,3.5) {J};
+  \node[state] (K) at (6,2.2) {K};
+  \node[state] (L) at (6,0.9) {L};
+  \node[state] (M) at (6,-0.4) {M};
+  \node[state] (N) at (6,-1.7) {N};
+  \node[state] (O) at (6,-3.0) {O};
+  \node[state] (P) at (6,-4.3) {P};
+
+  % Nivel 4
+  \node[state] (Q) at (8,2.2) {Q};
+  \node[state] (R) at (8,-0.4) {R};
+  \node[state] (S) at (8,-3.0) {S};
+
+  % Arestas
+  \draw[edge] (A) -- (B);
+  \draw[edge] (A) -- (C);
+  \draw[edge] (A) -- (D);
+
+  \draw[edge] (B) -- (E);
+  \draw[edge] (B) -- (F);
+
+  \draw[edge] (C) -- (G);
+  \draw[edge] (C) -- (H);
+
+  \draw[edge] (D) -- (I);
+
+  \draw[edge] (E) -- (J);
+  \draw[edge] (F) -- (K);
+  \draw[edge] (F) -- (L);
+  \draw[edge] (G) -- (M);
+  \draw[edge] (H) -- (N);
+  \draw[edge] (H) -- (O);
+  \draw[edge] (I) -- (P);
+
+  \draw[edge] (K) -- (Q);
+  \draw[edge] (M) -- (R);
+  \draw[edge] (O) -- (S);
+\end{tikzpicture}
+\caption{Grafo da Q1}
+\end{figure}
+
+\subsection{Arvore de busca da BFS (com ordem de expansao)}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  state/.style={draw, circle, minimum size=8mm, inner sep=0pt},
+  edge/.style={->, thick}
+]
+  % Nos com numero de expansao no superscrito
+  \node[state] (A) at (0,0) {$A^{1}$};
+
+  \node[state] (B) at (2,2) {$B^{2}$};
+  \node[state] (C) at (2,0) {$C^{3}$};
+  \node[state] (D) at (2,-2) {$D^{4}$};
+
+  \node[state] (E) at (4,3) {$E^{5}$};
+  \node[state] (F) at (4,1.5) {$F^{6}$};
+  \node[state] (G) at (4,0) {$G^{7}$};
+  \node[state] (H) at (4,-1.5) {$H^{8}$};
+  \node[state] (I) at (4,-3) {$I^{9}$};
+
+  \node[state] (J) at (6,3.5) {$J^{10}$};
+  \node[state] (K) at (6,2.2) {$K^{11}$};
+  \node[state] (L) at (6,0.9) {$L^{12}$};
+  \node[state] (M) at (6,-0.4) {$M^{13}$};
+  \node[state] (N) at (6,-1.7) {$N^{14}$};
+  \node[state] (O) at (6,-3.0) {$O^{15}$};
+  \node[state] (P) at (6,-4.3) {$P^{16}$};
+
+  \node[state] (Q) at (8,2.2) {$Q^{17}$};
+  \node[state] (R) at (8,-0.4) {$R^{18}$};
+  \node[state] (S) at (8,-3.0) {$S^{19}$};
+
+  % Arestas da arvore BFS
+  \draw[edge] (A) -- (B);
+  \draw[edge, blue!70!black, very thick] (A) -- (C);
+  \draw[edge] (A) -- (D);
+
+  \draw[edge] (B) -- (E);
+  \draw[edge] (B) -- (F);
+
+  \draw[edge] (C) -- (G);
+  \draw[edge, blue!70!black, very thick] (C) -- (H);
+
+  \draw[edge] (D) -- (I);
+
+  \draw[edge] (E) -- (J);
+  \draw[edge] (F) -- (K);
+  \draw[edge] (F) -- (L);
+  \draw[edge] (G) -- (M);
+  \draw[edge] (H) -- (N);
+  \draw[edge, blue!70!black, very thick] (H) -- (O);
+  \draw[edge] (I) -- (P);
+
+  \draw[edge] (K) -- (Q);
+  \draw[edge] (M) -- (R);
+  \draw[edge, blue!70!black, very thick] (O) -- (S);
+\end{tikzpicture}
+\caption{Arvore de busca BFS com indice de expansao; caminho solucao destacado em azul}
+\end{figure}
+
+\subsection{Fronteira e visitados da BFS}
+\textbf{Convencao usada:}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textit{Fronteira} = fila de abertos (da esquerda para a direita).
+  \item \textit{Visitados} = ordem de nos efetivamente expandidos.
+  \item Estado inicial: fronteira $=[A]$ e visitados $=\varnothing$.
+\end{itemize}
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{c c p{4.9cm} p{5.9cm}}
+\toprule
+Passo & No expandido & Fronteira (abertos) & Visitados \\
+\midrule
+0 & - & [A] & [] \\
+1 & A & [B, C, D] & [A] \\
+2 & B & [C, D, E, F] & [A, B] \\
+3 & C & [D, E, F, G, H] & [A, B, C] \\
+4 & D & [E, F, G, H, I] & [A, B, C, D] \\
+5 & E & [F, G, H, I, J] & [A, B, C, D, E] \\
+6 & F & [G, H, I, J, K, L] & [A, B, C, D, E, F] \\
+7 & G & [H, I, J, K, L, M] & [A, B, C, D, E, F, G] \\
+8 & H & [I, J, K, L, M, N, O] & [A, B, C, D, E, F, G, H] \\
+9 & I & [J, K, L, M, N, O, P] & [A, B, C, D, E, F, G, H, I] \\
+10 & J & [K, L, M, N, O, P] & [A, B, C, D, E, F, G, H, I, J] \\
+11 & K & [L, M, N, O, P, Q] & [A, B, C, D, E, F, G, H, I, J, K] \\
+12 & L & [M, N, O, P, Q] & [A, B, C, D, E, F, G, H, I, J, K, L] \\
+13 & M & [N, O, P, Q, R] & [A, B, C, D, E, F, G, H, I, J, K, L, M] \\
+14 & N & [O, P, Q, R] & [A, B, C, D, E, F, G, H, I, J, K, L, M, N] \\
+15 & O & [P, Q, R, S] & [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] \\
+16 & P & [Q, R, S] & [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] \\
+17 & Q & [R, S] & [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] \\
+18 & R & [S] & [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] \\
+19 & S & [] & [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Resultado final da BFS}
+\begin{itemize}[leftmargin=1.5em]
+  \item Caminho solucao: $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$.
+  \item Profundidade da solucao: 4.
+  \item Custo da solucao: 4.
+  \item Nos gerados: 19.
+  \item Nos expandidos: 19.
+\end{itemize}
+
+\subsection{Arvore de busca da DFS (com ordem de expansao)}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  state/.style={draw, circle, minimum size=8mm, inner sep=0pt},
+  edge/.style={->, thick}
+]
+  \node[state] (A) at (0,0) {$A^{1}$};
+
+  \node[state] (B) at (2,2) {$B^{2}$};
+  \node[state] (C) at (2,0) {$C^{9}$};
+  \node[state] (D) at (2,-2) {D};
+
+  \node[state] (E) at (4,3) {$E^{3}$};
+  \node[state] (F) at (4,1.5) {$F^{5}$};
+  \node[state] (G) at (4,0) {$G^{10}$};
+  \node[state] (H) at (4,-1.5) {$H^{13}$};
+
+  \node[state] (J) at (6,3.5) {$J^{4}$};
+  \node[state] (K) at (6,2.2) {$K^{6}$};
+  \node[state] (L) at (6,0.9) {$L^{8}$};
+  \node[state] (M) at (6,-0.4) {$M^{11}$};
+  \node[state] (N) at (6,-1.7) {$N^{14}$};
+  \node[state] (O) at (6,-3.0) {$O^{15}$};
+
+  \node[state] (Q) at (8,2.2) {$Q^{7}$};
+  \node[state] (R) at (8,-0.4) {$R^{12}$};
+  \node[state] (S) at (8,-3.0) {$S^{16}$};
+
+  \draw[edge] (A) -- (B);
+  \draw[edge, blue!70!black, very thick] (A) -- (C);
+  \draw[edge] (A) -- (D);
+
+  \draw[edge] (B) -- (E);
+  \draw[edge] (B) -- (F);
+  \draw[edge] (E) -- (J);
+  \draw[edge] (F) -- (K);
+  \draw[edge] (F) -- (L);
+  \draw[edge] (K) -- (Q);
+
+  \draw[edge] (C) -- (G);
+  \draw[edge, blue!70!black, very thick] (C) -- (H);
+  \draw[edge] (G) -- (M);
+  \draw[edge] (M) -- (R);
+  \draw[edge] (H) -- (N);
+  \draw[edge, blue!70!black, very thick] (H) -- (O);
+  \draw[edge, blue!70!black, very thick] (O) -- (S);
+\end{tikzpicture}
+\caption{Arvore de busca DFS com indice de expansao; caminho solucao em azul}
+\end{figure}
+
+\subsection{Fronteira e visitados da DFS}
+\begin{itemize}[leftmargin=1.5em]
+  \item Fronteira = pilha de abertos.
+  \item O topo da pilha esta na extrema direita da lista.
+  \item Estado inicial: fronteira $=[A]$ e visitados $=\varnothing$.
+\end{itemize}
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{c c p{4.9cm} p{5.9cm}}
+\toprule
+Passo & No expandido & Fronteira (pilha) & Visitados \\
+\midrule
+0 & - & [A] & [] \\
+1 & A & [D, C, B] & [A] \\
+2 & B & [D, C, F, E] & [A, B] \\
+3 & E & [D, C, F, J] & [A, B, E] \\
+4 & J & [D, C, F] & [A, B, E, J] \\
+5 & F & [D, C, L, K] & [A, B, E, J, F] \\
+6 & K & [D, C, L, Q] & [A, B, E, J, F, K] \\
+7 & Q & [D, C, L] & [A, B, E, J, F, K, Q] \\
+8 & L & [D, C] & [A, B, E, J, F, K, Q, L] \\
+9 & C & [D, H, G] & [A, B, E, J, F, K, Q, L, C] \\
+10 & G & [D, H, M] & [A, B, E, J, F, K, Q, L, C, G] \\
+11 & M & [D, H, R] & [A, B, E, J, F, K, Q, L, C, G, M] \\
+12 & R & [D, H] & [A, B, E, J, F, K, Q, L, C, G, M, R] \\
+13 & H & [D, O, N] & [A, B, E, J, F, K, Q, L, C, G, M, R, H] \\
+14 & N & [D, O] & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N] \\
+15 & O & [D, S] & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N, O] \\
+16 & S & [D] & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N, O, S] \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Resultado final da DFS}
+\begin{itemize}[leftmargin=1.5em]
+  \item Caminho solucao: $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$.
+  \item Profundidade da solucao: 4.
+  \item Custo da solucao: 4.
+  \item Nos gerados: 17.
+  \item Nos expandidos: 16.
+\end{itemize}
+
+\subsection{Busca iterativa em profundidade (IDS)}
+\textbf{Resumo por limite de profundidade:}
+\begin{table}[H]
+\centering
+\begin{tabular}{c c c c}
+\toprule
+Limite & Objetivo encontrado? & Nos gerados & Nos expandidos \\
+\midrule
+0 & nao & 1 & 1 \\
+1 & nao & 4 & 4 \\
+2 & nao & 9 & 9 \\
+3 & nao & 16 & 16 \\
+4 & sim & 17 & 16 \\
+\bottomrule
+\end{tabular}
+\caption{IDS por iteracao de limite}
+\end{table}
+
+\textbf{Ordem de visita aos nos (IDS):}
+\begin{table}[H]
+\centering
+\begin{tabular}{c p{10.5cm}}
+\toprule
+Limite & Ordem de visita (expansao) \\
+\midrule
+0 & [A] \\
+1 & [A, B, C, D] \\
+2 & [A, B, E, F, C, G, H, D, I] \\
+3 & [A, B, E, J, F, K, L, C, G, M, H, N, O, D, I, P] \\
+4 & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N, O, S] \\
+\bottomrule
+\end{tabular}
+\caption{IDS: ordem de visita dos nos em cada iteracao}
+\end{table}
+
+\subsection{Arvores da IDS em todas as iteracoes (limites 0 a 4)}
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.32\textwidth}
+\centering
+\begin{forest}
+for tree={
+  draw,
+  circle,
+  minimum size=6mm,
+  inner sep=0pt,
+  l sep=8mm,
+  s sep=6mm,
+  edge={->,thick}
+}
+[{$A^{1}$}]
+\end{forest}
+\caption{Limite 0}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering
+\begin{forest}
+for tree={
+  draw,
+  circle,
+  minimum size=6mm,
+  inner sep=0pt,
+  l sep=8mm,
+  s sep=6mm,
+  edge={->,thick}
+}
+[{$A^{1}$}
+  [{$B^{2}$}]
+  [{$C^{3}$}, edge+={blue!70!black,very thick}]
+  [{$D^{4}$}]
+]
+\end{forest}
+\caption{Limite 1}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering
+\begin{forest}
+for tree={
+  draw,
+  circle,
+  minimum size=6mm,
+  inner sep=0pt,
+  l sep=7mm,
+  s sep=4mm,
+  edge={->,thick}
+}
+[{$A^{1}$}
+  [{$B^{2}$}
+    [{$E^{3}$}]
+    [{$F^{4}$}]
+  ]
+  [{$C^{5}$}, edge+={blue!70!black,very thick}
+    [{$G^{6}$}]
+    [{$H^{7}$}, edge+={blue!70!black,very thick}]
+  ]
+  [{$D^{8}$}
+    [{$I^{9}$}]
+  ]
+]
+\end{forest}
+\caption{Limite 2}
+\end{subfigure}
+
+\vspace{0.8em}
+
+\begin{subfigure}[t]{0.49\textwidth}
+\centering
+\begin{forest}
+for tree={
+  draw,
+  circle,
+  minimum size=6mm,
+  inner sep=0pt,
+  l sep=7mm,
+  s sep=4mm,
+  edge={->,thick}
+}
+[{$A^{1}$}
+  [{$B^{2}$}
+    [{$E^{3}$}
+      [{$J^{4}$}]
+    ]
+    [{$F^{5}$}
+      [{$K^{6}$}]
+      [{$L^{7}$}]
+    ]
+  ]
+  [{$C^{8}$}, edge+={blue!70!black,very thick}
+    [{$G^{9}$}
+      [{$M^{10}$}]
+    ]
+    [{$H^{11}$}, edge+={blue!70!black,very thick}
+      [{$N^{12}$}]
+      [{$O^{13}$}, edge+={blue!70!black,very thick}]
+    ]
+  ]
+  [{$D^{14}$}
+    [{$I^{15}$}
+      [{$P^{16}$}]
+    ]
+  ]
+]
+\end{forest}
+\caption{Limite 3}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\centering
+\begin{forest}
+for tree={
+  draw,
+  circle,
+  minimum size=6mm,
+  inner sep=0pt,
+  l sep=7mm,
+  s sep=4mm,
+  edge={->,thick}
+}
+[{$A^{1}$}
+  [{$B^{2}$}
+    [{$E^{3}$}
+      [{$J^{4}$}]
+    ]
+    [{$F^{5}$}
+      [{$K^{6}$}
+        [{$Q^{7}$}]
+      ]
+      [{$L^{8}$}]
+    ]
+  ]
+  [{$C^{9}$}, edge+={blue!70!black,very thick}
+    [{$G^{10}$}
+      [{$M^{11}$}
+        [{$R^{12}$}]
+      ]
+    ]
+    [{$H^{13}$}, edge+={blue!70!black,very thick}
+      [{$N^{14}$}]
+      [{$O^{15}$}, edge+={blue!70!black,very thick}
+        [{$S^{16}$}, edge+={blue!70!black,very thick}]
+      ]
+    ]
+  ]
+  [D]
+]
+\end{forest}
+\caption{Limite 4}
+\end{subfigure}
+\caption{IDS: uma arvore por iteracao de limite; caminho solucao em azul}
+\end{figure}
+
+\subsection{Fronteira e visitados da IDS (iteracao limite 4)}
+\begin{itemize}[leftmargin=1.5em]
+  \item Nesta tabela, mostramos a iteracao que encontrou o objetivo.
+  \item A fronteira e tratada como pilha (topo na extrema direita).
+\end{itemize}
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{c c p{4.9cm} p{5.9cm}}
+\toprule
+Passo & No expandido & Fronteira (pilha) & Visitados \\
+\midrule
+0 & - & [A] & [] \\
+1 & A & [D, C, B] & [A] \\
+2 & B & [D, C, F, E] & [A, B] \\
+3 & E & [D, C, F, J] & [A, B, E] \\
+4 & J & [D, C, F] & [A, B, E, J] \\
+5 & F & [D, C, L, K] & [A, B, E, J, F] \\
+6 & K & [D, C, L, Q] & [A, B, E, J, F, K] \\
+7 & Q & [D, C, L] & [A, B, E, J, F, K, Q] \\
+8 & L & [D, C] & [A, B, E, J, F, K, Q, L] \\
+9 & C & [D, H, G] & [A, B, E, J, F, K, Q, L, C] \\
+10 & G & [D, H, M] & [A, B, E, J, F, K, Q, L, C, G] \\
+11 & M & [D, H, R] & [A, B, E, J, F, K, Q, L, C, G, M] \\
+12 & R & [D, H] & [A, B, E, J, F, K, Q, L, C, G, M, R] \\
+13 & H & [D, O, N] & [A, B, E, J, F, K, Q, L, C, G, M, R, H] \\
+14 & N & [D, O] & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N] \\
+15 & O & [D, S] & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N, O] \\
+16 & S & [D] & [A, B, E, J, F, K, Q, L, C, G, M, R, H, N, O, S] \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Resultado final da IDS}
+\begin{itemize}[leftmargin=1.5em]
+  \item Caminho solucao: $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$.
+  \item Profundidade da solucao: 4.
+  \item Custo da solucao: 4.
+  \item Nos gerados totais (somando limites 0..4): 47.
+  \item Nos expandidos totais (somando limites 0..4): 46.
+\end{itemize}
+
+\subsection{Experimento adicional: alteracao da ordem de sucessores}
+\textbf{Alteracoes aplicadas (exatamente dois nos):}
+\begin{itemize}[leftmargin=1.5em]
+  \item $C: [G,H] \rightarrow [H,G]$
+  \item $F: [K,L] \rightarrow [L,K]$
+\end{itemize}
+
+\textbf{Resultados apos reexecucao dos tres algoritmos:}
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4.2pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{4.9cm} c c c c}
+\toprule
+Algoritmo & Caminho & Prof. & Custo & Gerados & Expandidos \\
+\midrule
+BFS (original) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$ & 4 & 4 & 19 & 19 \\
+BFS (modificado) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$ & 4 & 4 & 19 & 18 \\
+\midrule
+DFS (original) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$ & 4 & 4 & 17 & 16 \\
+DFS (modificado) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$ & 4 & 4 & 15 & 13 \\
+\midrule
+IDS (original, total) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$ & 4 & 4 & 47 & 46 \\
+IDS (modificado, total) & $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$ & 4 & 4 & 45 & 43 \\
+\bottomrule
+\end{tabular}
+\caption{Comparacao numerica antes/depois da alteracao}
+\end{table}
+
+\subsection{Redesenho completo apos a alteracao de sucessores}
+\textbf{Grafo apos alteracao em dois nos:}
+\begin{itemize}[leftmargin=1.5em]
+  \item $C: [H,G]$
+  \item $F: [L,K]$
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  state/.style={draw, circle, minimum size=7mm, inner sep=0pt},
+  edge/.style={->, thick}
+]
+  \node[state] (A) at (0,0) {A};
+  \node[state] (B) at (2,2) {B};
+  \node[state] (C) at (2,0) {C};
+  \node[state] (D) at (2,-2) {D};
+
+  \node[state] (E) at (4,3) {E};
+  \node[state] (F) at (4,1.5) {F};
+  \node[state] (G) at (4,0) {G};
+  \node[state] (H) at (4,-1.5) {H};
+  \node[state] (I) at (4,-3) {I};
+
+  \node[state] (J) at (6,3.5) {J};
+  \node[state] (K) at (6,2.2) {K};
+  \node[state] (L) at (6,0.9) {L};
+  \node[state] (M) at (6,-0.4) {M};
+  \node[state] (N) at (6,-1.7) {N};
+  \node[state] (O) at (6,-3.0) {O};
+  \node[state] (P) at (6,-4.3) {P};
+
+  \node[state] (Q) at (8,2.2) {Q};
+  \node[state] (R) at (8,-0.4) {R};
+  \node[state] (S) at (8,-3.0) {S};
+
+  \draw[edge] (A) -- (B);
+  \draw[edge] (A) -- (C);
+  \draw[edge] (A) -- (D);
+  \draw[edge] (B) -- (E);
+  \draw[edge] (B) -- (F);
+  \draw[edge] (C) -- (H);
+  \draw[edge] (C) -- (G);
+  \draw[edge] (D) -- (I);
+  \draw[edge] (E) -- (J);
+  \draw[edge] (F) -- (L);
+  \draw[edge] (F) -- (K);
+  \draw[edge] (G) -- (M);
+  \draw[edge] (H) -- (N);
+  \draw[edge] (H) -- (O);
+  \draw[edge] (I) -- (P);
+  \draw[edge] (K) -- (Q);
+  \draw[edge] (M) -- (R);
+  \draw[edge] (O) -- (S);
+\end{tikzpicture}
+\caption{Grafo apos alteracao da ordem de sucessores (estrutura igual, ordem local alterada em C e F)}
+\end{figure}
+
+\textbf{Arvore BFS (ordem modificada):}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  state/.style={draw, circle, minimum size=8mm, inner sep=0pt},
+  edge/.style={->, thick}
+]
+  \node[state] (A) at (0,0) {$A^{1}$};
+  \node[state] (B) at (2,2) {$B^{2}$};
+  \node[state] (C) at (2,0) {$C^{3}$};
+  \node[state] (D) at (2,-2) {$D^{4}$};
+
+  \node[state] (E) at (4,3) {$E^{5}$};
+  \node[state] (F) at (4,1.5) {$F^{6}$};
+  \node[state] (H) at (4,0) {$H^{7}$};
+  \node[state] (G) at (4,-1.5) {$G^{8}$};
+  \node[state] (I) at (4,-3) {$I^{9}$};
+
+  \node[state] (J) at (6,3.5) {$J^{10}$};
+  \node[state] (L) at (6,2.2) {$L^{11}$};
+  \node[state] (K) at (6,0.9) {$K^{12}$};
+  \node[state] (N) at (6,-0.4) {$N^{13}$};
+  \node[state] (O) at (6,-1.7) {$O^{14}$};
+  \node[state] (M) at (6,-3.0) {$M^{15}$};
+  \node[state] (P) at (6,-4.3) {$P^{16}$};
+
+  \node[state] (Q) at (8,0.9) {$Q^{17}$};
+  \node[state] (S) at (8,-1.7) {$S^{18}$};
+  \node[state] (R) at (8,-3.0) {R};
+
+  \draw[edge] (A) -- (B);
+  \draw[edge, blue!70!black, very thick] (A) -- (C);
+  \draw[edge] (A) -- (D);
+  \draw[edge] (B) -- (E);
+  \draw[edge] (B) -- (F);
+  \draw[edge, blue!70!black, very thick] (C) -- (H);
+  \draw[edge] (C) -- (G);
+  \draw[edge] (D) -- (I);
+  \draw[edge] (E) -- (J);
+  \draw[edge] (F) -- (L);
+  \draw[edge] (F) -- (K);
+  \draw[edge] (H) -- (N);
+  \draw[edge, blue!70!black, very thick] (H) -- (O);
+  \draw[edge] (G) -- (M);
+  \draw[edge] (I) -- (P);
+  \draw[edge] (K) -- (Q);
+  \draw[edge] (M) -- (R);
+  \draw[edge, blue!70!black, very thick] (O) -- (S);
+\end{tikzpicture}
+\caption{BFS apos alteracao; R permanece na fronteira quando S e encontrado}
+\end{figure}
+
+\textbf{Arvore DFS (ordem modificada):}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  state/.style={draw, circle, minimum size=8mm, inner sep=0pt},
+  edge/.style={->, thick}
+]
+  \node[state] (A) at (0,0) {$A^{1}$};
+  \node[state] (B) at (2,2) {$B^{2}$};
+  \node[state] (C) at (2,0) {$C^{9}$};
+  \node[state] (D) at (2,-2) {D};
+
+  \node[state] (E) at (4,3) {$E^{3}$};
+  \node[state] (F) at (4,1.5) {$F^{5}$};
+  \node[state] (H) at (4,0) {$H^{10}$};
+  \node[state] (G) at (4,-1.5) {G};
+
+  \node[state] (J) at (6,3.5) {$J^{4}$};
+  \node[state] (L) at (6,2.2) {$L^{6}$};
+  \node[state] (K) at (6,0.9) {$K^{7}$};
+  \node[state] (N) at (6,-0.4) {$N^{11}$};
+  \node[state] (O) at (6,-1.7) {$O^{12}$};
+
+  \node[state] (Q) at (8,0.9) {$Q^{8}$};
+  \node[state] (S) at (8,-1.7) {$S^{13}$};
+
+  \draw[edge] (A) -- (B);
+  \draw[edge, blue!70!black, very thick] (A) -- (C);
+  \draw[edge] (A) -- (D);
+  \draw[edge] (B) -- (E);
+  \draw[edge] (B) -- (F);
+  \draw[edge] (E) -- (J);
+  \draw[edge] (F) -- (L);
+  \draw[edge] (F) -- (K);
+  \draw[edge] (K) -- (Q);
+  \draw[edge, blue!70!black, very thick] (C) -- (H);
+  \draw[edge] (C) -- (G);
+  \draw[edge] (H) -- (N);
+  \draw[edge, blue!70!black, very thick] (H) -- (O);
+  \draw[edge, blue!70!black, very thick] (O) -- (S);
+\end{tikzpicture}
+\caption{DFS apos alteracao; D e G permanecem na fronteira quando S e encontrado}
+\end{figure}
+
+\textbf{Arvores IDS apos alteracao (limites 0 a 4):}
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.32\textwidth}
+\centering
+\begin{forest}
+for tree={draw,circle,minimum size=6mm,inner sep=0pt,l sep=8mm,s sep=6mm,edge={->,thick}}
+[{$A^{1}$}]
+\end{forest}
+\caption{Limite 0}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering
+\begin{forest}
+for tree={draw,circle,minimum size=6mm,inner sep=0pt,l sep=8mm,s sep=6mm,edge={->,thick}}
+[{$A^{1}$}
+  [{$B^{2}$}]
+  [{$C^{3}$}, edge+={blue!70!black,very thick}]
+  [{$D^{4}$}]
+]
+\end{forest}
+\caption{Limite 1}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering
+\begin{forest}
+for tree={draw,circle,minimum size=6mm,inner sep=0pt,l sep=7mm,s sep=4mm,edge={->,thick}}
+[{$A^{1}$}
+  [{$B^{2}$}
+    [{$E^{3}$}]
+    [{$F^{4}$}]
+  ]
+  [{$C^{5}$}, edge+={blue!70!black,very thick}
+    [{$H^{6}$}, edge+={blue!70!black,very thick}]
+    [{$G^{7}$}]
+  ]
+  [{$D^{8}$}
+    [{$I^{9}$}]
+  ]
+]
+\end{forest}
+\caption{Limite 2}
+\end{subfigure}
+
+\vspace{0.8em}
+
+\begin{subfigure}[t]{0.49\textwidth}
+\centering
+\begin{forest}
+for tree={draw,circle,minimum size=6mm,inner sep=0pt,l sep=7mm,s sep=4mm,edge={->,thick}}
+[{$A^{1}$}
+  [{$B^{2}$}
+    [{$E^{3}$}
+      [{$J^{4}$}]
+    ]
+    [{$F^{5}$}
+      [{$L^{6}$}]
+      [{$K^{7}$}]
+    ]
+  ]
+  [{$C^{8}$}, edge+={blue!70!black,very thick}
+    [{$H^{9}$}, edge+={blue!70!black,very thick}
+      [{$N^{10}$}]
+      [{$O^{11}$}, edge+={blue!70!black,very thick}]
+    ]
+    [{$G^{12}$}
+      [{$M^{13}$}]
+    ]
+  ]
+  [{$D^{14}$}
+    [{$I^{15}$}
+      [{$P^{16}$}]
+    ]
+  ]
+]
+\end{forest}
+\caption{Limite 3}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\centering
+\begin{forest}
+for tree={draw,circle,minimum size=6mm,inner sep=0pt,l sep=7mm,s sep=4mm,edge={->,thick}}
+[{$A^{1}$}
+  [{$B^{2}$}
+    [{$E^{3}$}
+      [{$J^{4}$}]
+    ]
+    [{$F^{5}$}
+      [{$L^{6}$}]
+      [{$K^{7}$}
+        [{$Q^{8}$}]
+      ]
+    ]
+  ]
+  [{$C^{9}$}, edge+={blue!70!black,very thick}
+    [{$H^{10}$}, edge+={blue!70!black,very thick}
+      [{$N^{11}$}]
+      [{$O^{12}$}, edge+={blue!70!black,very thick}
+        [{$S^{13}$}, edge+={blue!70!black,very thick}]
+      ]
+    ]
+    [G]
+  ]
+  [D]
+]
+\end{forest}
+\caption{Limite 4}
+\end{subfigure}
+\caption{IDS apos alteracao: uma arvore por limite; caminho solucao em azul}
+\end{figure}
+
+\textbf{Mudanca na ordem de expansao (resumo):}
+\begin{itemize}[leftmargin=1.5em]
+  \item BFS original: $[A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S]$.
+  \item BFS modificado: $[A,B,C,D,E,F,H,G,I,J,L,K,N,O,M,P,Q,S]$.
+  \item DFS original: $[A,B,E,J,F,K,Q,L,C,G,M,R,H,N,O,S]$.
+  \item DFS modificado: $[A,B,E,J,F,L,K,Q,C,H,N,O,S]$.
+  \item IDS (limite 4) original: $[A,B,E,J,F,K,Q,L,C,G,M,R,H,N,O,S]$.
+  \item IDS (limite 4) modificado: $[A,B,E,J,F,L,K,Q,C,H,N,O,S]$.
+\end{itemize}
+
+\subsection{Respostas objetivas do experimento}
+\begin{itemize}[leftmargin=1.5em]
+  \item a) O caminho solucao mudou? \textbf{Nao}. Em todos os casos permaneceu $A \rightarrow C \rightarrow H \rightarrow O \rightarrow S$.
+  \item b) A quantidade de nos expandidos mudou? \textbf{Sim}. BFS: $19 \rightarrow 18$, DFS: $16 \rightarrow 13$, IDS (total): $46 \rightarrow 43$.
+  \item c) Algum algoritmo foi mais sensivel a ordem dos sucessores? \textbf{Sim, DFS}. Foi o que mais reduziu expansoes (queda de 3, cerca de 18,75\%).
+  \item d) Qual algoritmo apresentou maior consumo de memoria? \textbf{BFS}. Maior fronteira maxima observada ($7$ nos), contra $4$ em DFS/IDS.
+  \item e) Qual algoritmo encontrou a solucao mais rapidamente? \textbf{DFS modificado}, com 13 nos expandidos.
+\end{itemize}
+
+\subsection{Comparacao final entre os algoritmos}
+\textbf{Notacao das complexidades:}
+\begin{itemize}[leftmargin=1.5em]
+  \item $b$: fator de ramificacao medio.
+  \item $d$: profundidade da solucao mais rasa.
+  \item $m$: profundidade maxima da arvore de busca.
+\end{itemize}
+
+\begin{enumerate}[label=\alph*)]
+  \item \textbf{Completude}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: completo em espaco finito e com $b$ finito.
+    \item DFS: nao completo em geral (pode prender em ramo muito profundo/infinito); neste problema finito, encontrou solucao.
+    \item IDS: completo em espaco finito e com $b$ finito.
+  \end{itemize}
+
+  \item \textbf{Otimalidade}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: otimo quando os custos de aresta sao unitarios (caso desta questao).
+    \item DFS: nao e otimo em geral.
+    \item IDS: otimo com custos unitarios (encontra a primeira solucao na menor profundidade).
+  \end{itemize}
+
+  \item \textbf{Complexidade de tempo}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: $O(b^d)$.
+    \item DFS: $O(b^m)$.
+    \item IDS: $O(b^d)$ (com custo extra por reexpandir nos em limites menores).
+  \end{itemize}
+
+  \item \textbf{Complexidade de espaco}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: $O(b^d)$ (guarda toda a fronteira do nivel).
+    \item DFS: $O(bm)$ (guarda basicamente o caminho atual e alternativas locais).
+    \item IDS: $O(bd)$ (parecido com DFS por iteracao).
+  \end{itemize}
+
+  \item \textbf{Dependencia da ordem dos sucessores}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: media (a ordem afeta expansoes, mas menos que DFS).
+    \item DFS: alta (a ordem muda fortemente o ramo seguido primeiro).
+    \item IDS: media/alta (cada iteracao e DFS-limitada, entao herda essa sensibilidade).
+  \end{itemize}
+
+  \item \textbf{Comportamento em arvores profundas}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: tende a estourar memoria.
+    \item DFS: usa pouca memoria, mas pode descer em ramos ruins.
+    \item IDS: boa alternativa quando ha limite de memoria, ao custo de repeticao.
+  \end{itemize}
+
+  \item \textbf{Adequacao para problemas grandes}
+  \begin{itemize}[leftmargin=1.5em]
+    \item BFS: limitado quando a fronteira cresce muito.
+    \item DFS: bom quando memoria e critica e otimalidade nao e obrigatoria.
+    \item IDS: bom compromisso entre completude e memoria em problemas de custo unitario.
+  \end{itemize}
+\end{enumerate}

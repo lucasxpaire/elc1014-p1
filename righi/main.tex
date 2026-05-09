@@ -1,0 +1,92 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage[edges]{forest}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\usepackage{listings}
+\lstdefinestyle{py}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{orange!60!black},
+  numbers=left,
+  numberstyle=\scriptsize\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  tabsize=4
+}
+\lstset{style=py}
+
+\newcommand{\estado}[1]{\texttt{#1}}
+\newcommand{\fronteira}{\textit{fronteira}}
+
+\title{Prova 1 - Inteligencia Artificial\\Template de Resolucao}
+\author{Aluno(a): \underline{\hspace{7cm}}}
+\date{Maio de 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{Orientacoes Rapidas}
+\begin{itemize}[leftmargin=1.5em]
+  \item Use o PDF da prova como referencia oficial para grafos/figuras.
+  \item Preencha cada secao `qX.tex` com modelagem, tabelas, analise e conclusoes.
+  \item Para arvores, use os modelos com `forest`/`tikz` e ajuste os nos.
+  \item Rode os codigos Python localmente e transcreva os resultados para as tabelas.
+\end{itemize}
+
+\input{sections/q1}
+\input{sections/q2}
+\input{sections/q3}
+\input{sections/q4}
+\input{sections/q5}
+\input{sections/q6}
+
+\appendix
+\section{Codigos Python}
+
+\subsection{Questao 1}
+\lstinputlisting{codes/q1_buscas.py}
+
+\subsection{Questao 2}
+\lstinputlisting{codes/q2_greedy_astar.py}
+
+\subsection{Questao 3}
+\lstinputlisting{codes/q3_busca_local.py}
+
+\subsection{Questao 4}
+\lstinputlisting{codes/q4_csp.py}
+
+\subsection{Questao 5}
+\lstinputlisting{codes/q5_minimax_alphabeta.py}
+
+\subsection{Questao 6}
+\lstinputlisting{codes/q6_mcts.py}
+
+\end{document}

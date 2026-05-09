@@ -1,0 +1,311 @@
+\section{Questao 5 - Minimax e Poda Alpha-Beta}
+
+\subsection{Conceitos pedidos no enunciado}
+\begin{itemize}[leftmargin=1.5em]
+  \item Objetivo do Minimax: escolher a acao que maximiza o resultado de MAX assumindo MIN otimo.
+  \item Diferenca MAX/MIN: nos MAX escolhem maior valor; nos MIN escolhem menor valor.
+  \item Utilidade: valor terminal (folha) que mede o resultado final do jogo.
+  \item Propagacao: os valores sobem das folhas para a raiz alternando regras MAX/MIN.
+  \item Adversario perfeito: MIN sempre joga da melhor forma para reduzir o ganho de MAX.
+  \item Poda Alpha-Beta: elimina ramos que nao podem mais alterar a decisao final da raiz.
+\end{itemize}
+
+\subsection{Dados da arvore}
+Folhas (esquerda para direita):
+\[
+[3,5,6,9,1,2,0,-1,7,4,5,6]
+\]
+Raiz $A$ e do tipo MAX; filhos $B$, $C$, $D$ sao MIN; cada um possui 4 folhas.
+
+\subsection{Minimax passo a passo}
+\begin{table}[H]
+\centering
+\begin{tabular}{c c c c}
+\toprule
+No & Tipo & Folhas/filhos avaliados & Valor \\
+\midrule
+$B$ & MIN & $[3,5,6,9]$ & 3 \\
+$C$ & MIN & $[1,2,0,-1]$ & -1 \\
+$D$ & MIN & $[7,4,5,6]$ & 4 \\
+$A$ & MAX & $[B=3,C=-1,D=4]$ & 4 \\
+\bottomrule
+\end{tabular}
+\caption{Propagacao de valores do Minimax}
+\end{table}
+
+\textbf{Decisao de MAX na raiz:} escolher $D$ (valor 4).\\
+\textbf{Ordem de expansao usada:} esquerda $\rightarrow$ direita (B, depois C, depois D; e folhas de cada no tambem da esquerda para direita).\\
+\textbf{Caminho escolhido:} $A \rightarrow D$.\\
+\textbf{Nos visitados:} 16 (4 internos + 12 folhas).
+
+\subsection{Arvore parcialmente preenchida (visao estrutural)}
+\begin{figure}[H]
+\centering
+\begin{forest}
+for tree={
+  draw,
+  rounded corners,
+  align=center,
+  parent anchor=south,
+  child anchor=north,
+  l sep=10mm,
+  s sep=8mm
+}
+[A\\MAX\\4
+  [B\\MIN\\3
+    [3]
+    [5]
+    [6]
+    [9]
+  ]
+  [C\\MIN\\-1
+    [1]
+    [2]
+    [0]
+    [-1]
+  ]
+  [D\\MIN\\4
+    [7]
+    [4]
+    [5]
+    [6]
+  ]
+]
+\end{forest}
+\caption{Arvore da questao com valores Minimax}
+\end{figure}
+
+\subsection{Alpha-Beta (mesma ordem do enunciado)}
+\begingroup
+\small
+\begin{longtable}{c c c c c c}
+\toprule
+Passo & No MIN & Folha & $\alpha$ & $\beta$ & Poda \\
+\midrule
+1 & B & 3 & $-\infty$ & 3 & nao \\
+2 & B & 5 & $-\infty$ & 3 & nao \\
+3 & B & 6 & $-\infty$ & 3 & nao \\
+4 & B & 9 & $-\infty$ & 3 & nao \\
+5 & C & 1 & 3 & 1 & sim \\
+6 & D & 7 & 3 & 7 & nao \\
+7 & D & 4 & 3 & 4 & nao \\
+8 & D & 5 & 3 & 4 & nao \\
+9 & D & 6 & 3 & 4 & nao \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\textbf{Resultado:}
+\begin{itemize}[leftmargin=1.5em]
+  \item valor na raiz continua 4 (mesma decisao final do Minimax);
+  \item folhas podadas: 3 (as 3 ultimas folhas de $C$);
+  \item ramos podados: no subarvore de $C$, apos avaliar a folha 1;
+  \item nos nao explorados: 3 folhas (2, 0 e -1);
+  \item nos visitados: 13 (4 internos + 9 folhas).
+\end{itemize}
+
+\textbf{Motivo matematico da poda:} em um no MIN, quando $\beta \le \alpha$, nenhum descendente restante pode melhorar a decisao de MAX na raiz.\\
+\textbf{Observacao importante:} no registro do Alpha-Beta com poda, $C$ aparece com valor parcial 1, porque o no foi cortado apos a primeira folha. Isso nao contradiz o Minimax completo ($C=-1$), apenas indica avaliacao interrompida pelo limite $\beta \le \alpha$.
+
+\subsection{Representacao visual da poda Alpha-Beta}
+\begin{figure}[H]
+\centering
+\begin{forest}
+for tree={
+  draw,
+  rounded corners,
+  align=center,
+  parent anchor=south,
+  child anchor=north,
+  l sep=10mm,
+  s sep=7mm
+}
+[A\\MAX\\4
+  [B\\MIN\\3
+    [3]
+    [5]
+    [6]
+    [9]
+  ]
+  [C\\MIN\\1*
+    [1]
+    [{\color{gray}2\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+    [{\color{gray}0\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+    [{\color{gray}-1\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+  ]
+  [D\\MIN\\4
+    [7]
+    [4]
+    [5]
+    [6]
+  ]
+]
+\end{forest}
+\caption{Poda Alpha-Beta na ordem original: em $C$, apenas a folha 1 e avaliada; as demais 3 folhas sao podadas}
+\end{figure}
+
+\subsection{Reordenacao para maximizar podas}
+Reordenacao usada na implementacao:
+\[
+\text{raiz: } [D,B,C]
+\]
+e, dentro de cada no MIN, folhas em ordem crescente para provocar corte cedo.
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Podas antes da reordenacao: 3 folhas podadas.
+  \item Podas depois da reordenacao: 6 folhas podadas.
+  \item Valor final na raiz permanece 4 (decisao correta preservada).
+  \item A nova ordem melhora eficiencia porque encontra limites fortes cedo, ativando cortes antecipados.
+  \item Relacao ordenacao x desempenho: quanto melhor a ordem de exploracao (melhores nos primeiro), maior tende a ser o ganho da poda Alpha-Beta.
+\end{itemize}
+
+\subsection{Minimax limitado (profundidade 2)}
+Heuristicas de corte fornecidas:
+\[
+[4,7,2,5,6,1]
+\]
+Agrupando em 3 blocos MIN:
+\[
+\min(4,7)=4,\quad \min(2,5)=2,\quad \min(6,1)=1
+\]
+Logo, na raiz:
+\[
+\max(4,2,1)=4
+\]
+Decisao do limitado coincide com o valor da raiz no Minimax completo (4).
+\textbf{Possiveis erros por heuristica:} se a estimativa local estiver enviesada, o Minimax limitado pode escolher um ramo diferente do Minimax completo, pois nao enxerga efeitos taticos que so aparecem em profundidades maiores.
+
+\subsection{Experimento adicional: alterar 3 folhas}
+Alteracao aplicada:
+\[
+[3,5,6] \rightarrow [8,8,8]
+\]
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Minimax modificado: raiz=8, $B=8$, $C=-1$, $D=4$.
+  \item Alpha-Beta modificado: raiz=8, com 10 nos visitados e 6 folhas podadas.
+  \item A decisao final muda: MAX passa de $D$ para $B$.
+  \item Sensibilidade as utilidades: pequena alteracao em folhas do ramo B alterou o valor minimax do ramo de 3 para 8, mudando totalmente a decisao da raiz.
+\end{itemize}
+
+\subsection{Desenhos pos-experimento (Minimax e Alpha-Beta)}
+\begin{figure}[H]
+\centering
+\resizebox{0.98\linewidth}{!}{
+\begin{forest}
+for tree={
+  draw,
+  rounded corners,
+  align=center,
+  parent anchor=south,
+  child anchor=north,
+  l sep=10mm,
+  s sep=8mm
+}
+[A\\MAX\\8
+  [B\\MIN\\8
+    [8]
+    [8]
+    [8]
+    [9]
+  ]
+  [C\\MIN\\-1
+    [1]
+    [2]
+    [0]
+    [-1]
+  ]
+  [D\\MIN\\4
+    [7]
+    [4]
+    [5]
+    [6]
+  ]
+]
+\end{forest}
+}
+\caption{Arvore Minimax apos o experimento: MAX escolhe $B$ (valor 8)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.98\linewidth}{!}{
+\begin{forest}
+for tree={
+  draw,
+  rounded corners,
+  align=center,
+  parent anchor=south,
+  child anchor=north,
+  l sep=10mm,
+  s sep=7mm
+}
+[A\\MAX\\8
+  [B\\MIN\\8
+    [8]
+    [8]
+    [8]
+    [9]
+  ]
+  [C\\MIN\\1*
+    [1]
+    [{\color{gray}2\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+    [{\color{gray}0\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+    [{\color{gray}-1\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+  ]
+  [D\\MIN\\7*
+    [7]
+    [{\color{gray}4\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+    [{\color{gray}5\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+    [{\color{gray}6\\[-1pt]\tiny podado}, draw=gray, edge={gray,dashed}]
+  ]
+]
+\end{forest}
+}
+\caption{Alpha-Beta pos-experimento (ordem original): 6 podas (3 em $C$ e 3 em $D$)}
+\end{figure}
+
+\subsection{Comparacao final (Q5)}
+\begin{table}[H]
+\centering
+\begin{tabular}{l c c}
+\toprule
+Cenario & Minimax (nos) & Alpha-Beta (nos / podas) \\
+\midrule
+Original & 16 & 13 / 3 folhas \\
+Reordenado & - & 10 / 6 folhas \\
+Modificado (3 folhas) & 16 & 10 / 6 folhas \\
+\bottomrule
+\end{tabular}
+\caption{Comparacao quantitativa das execucoes}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{4.5cm} >{\raggedright\arraybackslash}p{4.5cm}}
+\toprule
+\textbf{Criterio} & \textbf{Minimax} & \textbf{Alpha-Beta} \\
+\midrule
+Nos explorados (nesta prova) & 16 nos no cenario original e 16 no modificado & 13 nos no original; 10 com reordenacao e no modificado \\
+Quantidade de podas & 0 (nao realiza poda) & 3 podas no original; 6 apos reordenacao \\
+Custo computacional (teorico) & $O(b^m)$ & pior caso $O(b^m)$; melhor caso com boa ordenacao $O(b^{m/2})$ \\
+Consumo de memoria (teorico) & $O(bm)$ (busca em profundidade) & $O(bm)$, mesma ordem assintotica \\
+Impacto da ordenacao dos filhos & baixo (nao altera exploracao) & alto (ordem melhor aumenta as podas) \\
+Qualidade da decisao & exata (adversario perfeito) & exata e igual ao Minimax quando a poda e correta \\
+\bottomrule
+\end{tabular}
+\endgroup
+\caption{Comparacao Minimax vs Alpha-Beta com criterios teoricos e evidencias da execucao}
+\end{table}
+
+\textbf{Sintese:}
+\begin{itemize}[leftmargin=1.5em]
+  \item custo computacional: Alpha-Beta $\le$ Minimax (mesma decisao, menos nos);
+  \item consumo de memoria: mesma ordem assintotica (DFS na arvore), diferindo pouco na pratica aqui;
+  \item impacto da ordenacao: muito alto no Alpha-Beta (podas sobem de 3 para 6);
+  \item qualidade da decisao: igual ao Minimax quando os cortes sao corretos.
+\end{itemize}

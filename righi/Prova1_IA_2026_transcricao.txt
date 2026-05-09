@@ -1,0 +1,175 @@
+
+
+===== PAGINA 1 =====
+
+Questão 01 -Busca em amplitude/largura, Busca em profundidade e Busca iterativa em profundi dade Um agente deve se deslocar entre salas de um prédio. Cada sala é repre sentada por uma letra. As conexões representam movimentos permitidos entre salas. Todas as ações posSuen custo unitário. A tabela abaixo apresenta o grafo do problema. Sala Salas vizinhas (ordem obrigatória) A B C D 
+H 
+EJ 
+I J 
+G M 
+K 
+B, C, D 
+L 
+E, F G, H 
+K, L 
+Estado inichal: A 
+N, O P 
+Estado objetivo: S Formula o problema acima como um problema de busca em espa ÇOs de estados. A resposta deve couater: a) defiiç åo fot thal do cst ao b) estado inicial; c) teste de objetivo; d) funçåo seoa, e) fursao de custo; ) representação scolhida en Python. En segukia, tesola o problema utilizando os seguintes algoritmus: 1. Busca em amplitude/largura (Breith-First Search): 2. Busca em profundidade (Depth-Firnt Search): 3. Busca iterativa en profundidade (Iterative Deepening Search). Para cada algoritmo, apresent ar: a) ordem completa de expansão dos nós; 
+Prova Inteligência Artificial Prof. Luís Alvaro --luisalvaro0inf.uf sm. br -Maio 2026 
+b) conteúdo da fronteira após cada expansāo; c) árvore parcial de busca d) caminho soluçâo encontrado; e) profundidade da solução; 
+2 
+f) custo da solução; g) quantidade de nós gerados; h) quantidade de nós expandidos. Preencher uma tabela semelhante ao nodelo abaixO. Passo| Nó expandido| Conteúdo da fronteira |B,C,D| B 
+Implementar os três algoritmos em Python respeitando os seguintes cri térios: NÃO utilizar bibliotecas externas, bibliotecas prontas de grafos e implernentações encontradas na internet. 'Todo o código deve ser autoral. Experimento adicional: modiñcar a ordem dos sucessores de exatamente dois nós do grafo. Exernplo: 
+• alterar: 
+para: 
+Após a modificação, 1) executar novamente os três algoritmos; 2) compa rar os resultados obtidos; e 3) analisar o impacto da ordem dos sucessores. Responder as seguintes questões: a) O caminho solução mudou? 
+1/4 
+b) A quantidade de nós expandidos mudou? c) Algumn algoritmo foi mais sensível à ordem dos sucessores? d) Qual algoritmo apresentou maior consumo de memória? e) Qual algoritmo encontrou a solução mais rapidamente? Por fm, comparar os algoritmos considerando: a) completude; b) otima lidade; c) complexidade de tempo; d) complexidade de espaço; e) depen dència da ordem dos sucessores; f) comportanento erm árvores profundas; g) adequação para problemas grandes. Questão 02 – Busca Gulosa pela Melhor Escolha e A* Considerar o seguinte problema de navegação em um ambiente parcial mente bloqueado: um agente deve sair da posição Ae alcançar a posição T. Cada aresta possui um custo associado. Além disso, cada estado pos sui um valor heurístico h(n), que representa uma estimativa da distância restante até o objetivo. O grafo do problema é apreserntado abaixo. 
+Estado inicial: A 
+Apresentar: 
+A No Sucessores (custo) h(n) 
+F H J 
+C:G,H 
+K 
+C: H,G 
+L 
+Estado objetivo: T 
+P 
+R 
+B(2), C(4), D(3) E(3), F(5) G(4), H(6) 
+e) custo final da solução; 
+I(2) J(4) K(3), L(5) 
+a) ordem de expansão dos nós; 
+M(6) N(3), O(4) P(5) Q4) R(3) S(2) T(5) 
+T(4) T(3) 
+f(n) = h(n) 
+c) valores heurísticos utilizados; b) conteúdo da fronteira apÓs cada expansão; d) caminho solução encontrado; 
+10 8 7 9 6 5 
+7 
+Modelar o problema como un problena de busca em espaço de estados. Apreserntar: a) representação dos estados; b) estado inicial: c) teste de objetivo; d) função sucessora; e) função de custo; f) interpreta cão da heurística h(n). Em seguida, resolver o problema manualmente usando o algoritmo Greedy Best-First Search utilizando o valor heu rístico: 
+5 3 3 4 8 2 1
+
+===== PAGINA 2 =====
+
+) quantidade de nós gerados; g) quantidade de nós expandidos. Resolver o mesno problema utilizando o algoritmo A* com: 
+onde: • gn): custo acumulado do caminho; • h(n): heurística fornecida: • f(n): custo estimado total. Para cada expansão, apresentar: a) nó expandido; b) valor de g(n); c) valor de h(n); d) valor de f(n); e) contebdo da fronteira ordenada: 
+f(n) = g(n) + h(n) 
+f) caminho parcial até o nó. Preencher tabelas no seguinte formato: Passo| N6|g{n)į h{n)| fin) 1 
+Implementar os algoritnos Busca Glosa peia Aeihor FExoAa e Busca A* em Python respeitando os seguintes citétim: NÁO utiluat bibicte cas externas, bibliotecas protitas de grafos e inlettsestaçies etcontraias na internet, Todo o código deve se sutoral 
+a) A solução encontrada nudou? 
+Modificar os valores heurísticos de exalamente trôs nôs do grasu Após İsso, 1) execute novamente os algortmos, 2) cxtpare os eeuitaos, e 3) analise o impacto da heuristica. Responder as seguintes questáes: b) O custo da soluçâo mudou? 
+A B 
+d) O A* encont rou solução otina? c) A busca gulosa encontrou soluç åo tittaa? e) Qual algoritmo expandiu henas nós ? 
+onde: 
+10 
+Exenplo: 
+) Qual algoritmo foi mais sensível à heuristica? 
+signiica: 
+Por fim, comparar Greedy Best-First Searche A* onsiier ando: a) completude; b) otimalidade, c) consuno de nenória; d) dependéncia da heurística; e) custo comput acional; f) qualidade das soluções; g) com portamento em grafos grandes. 
+10 10 
+Questão 03 -Busca Local em Problena das N Rainhas Considerar o problema das -Rainhas. O objetivo é posicionar 8 rai nhas em um tabuleiro 8 x 8 de forma que nenhuma rainha ataque outra. Duas rainhas entram em confito quando estão i) na mesma linha, ii) na mesma coluna e iii) na mesma diagonal. Nesta atividade, cada estado será representado por um vetor: 
+• coluna 1 → linha 4; • coluna 2 → linha 2; 
+[S1, $2, $3, $4, 85, $6, 87, $8] 
+S; = linha da rainha na coluna 1 
+(4,2,7,3, 6, 8, 5, 1] 
+• coluna 8→ linha 1 Iniciar a busca a partir do estado: [1, 1, 1, 1, 1, 1, 1, 1] Considerar a seguinte função heurística: 
+Objetivo: 
+2/4 
+h(s) = número total de pares de rainhas em conflito 
+Um estado solução ocorre quando: 
+Modelar o problema como um problema de busca local. Apresen tar: a) representação do estado; b) defnição de vizinho; c) função de avaliaçāo; d) critério de parada; e) interpretação da superficie de busca. Em seguida, resolver o problema manualmente utilizando o algoritmo Hill-Climbing, onde um vizinho é obtido movendo exatamente UMA rainha para outra linha da MESMA coluna. A solução deve apresentar: a) estado atual; b) todos os vizinhos avaliados em cada iteração; d) estado escolhido; c) valor de h(s) para cada vizinho; 
+) número total de iterações; e) explicação da escolha realizada; g) estado final encontrado. A tesponta deve conter tabelas semelhantes ao modelo: 
+min h(s) 
+Alén disao, para cada iteração, mostrar pelo menO8 Os 5 melhores vizi nhs gerados. 
+a) por que ocorreu; 
+Iteração| Estado |h(s) ||1,1,1,1,1,1,1,1|| 28 
+Duratste a execuçao do Hill-Clinbing, identilicar se ocoreu máximo lo cal, platô, pico estreito ou solução global. Caso algum desses itens ocorra, explicar: b) como isso afetou a busca; 
+h(s) = 0 
+e) cono poderia ser evitado. Inplernentar uma versão com Random Restart Hill-Clinbing; 
+• Registrar: • Executar o algoritmo 20 vezes; • Cada execução deve iniciar em um estado aleatório; 
+onde: 
+número de passOs; -valor final de hls): Apresentar a seguinte tabela: -se encontrou solução ou não. 
+Execução | Estado inicial | PassOs | h(s) final Implementar o algoritmo Simulated Annealing usando a seguinte fun ção de aceitação: 
+• T: tenperatura atual. 
+P=e-AE/T • AE: aumento do número de conflitos; 
+..
+
+===== PAGINA 3 =====
+
+Apresentar: a) valor inicial da temperatura; b) política de resfriamento utilizada; c) exemplos de movimentos piores aceitos; d) comparação com Hill-Climbing simples: e) guantidade de soluções válidas encontradas. Implementar os algoritmos Hill-Climbing, Random Restart Hill-Climbing e Simulated Annealing em Python respeitando os seguintes critérios: NÃO utilizar bibliotecas externas, bibliotecas prontas de otimização e implementações encontradas na internet. Todo o código deve ser auto ral. Por fm, comparar os algoritmos considerando: a) qualidade das solu cões; b) velocidade de convergência; c) sensibilidade ao estado inicial: d) capacidade de escapar de máximos locais; e) custo computacional: f) estabilidade dos resultados. Questão 04 – CSP e Otimizações de Busca Um hospital precisa montar automaticamente a escala de plantões de um pequeno grupo de médicos. Os turnos são: 
+Os médicos disponíveis são: 
+Cada turno deve possuir exatamente um médico. Restrições que devem ser consideradas: 1, O mesmo médico NÃO pode trabalhar emn turnos consecutivos. 2. O médico A não pode trabalhar em: 
+T1,T2, T3, T4, T5,T6 
+3. O médico B deve trabalhar em pelo menos um turno entre: 
+{A, B,C, D} 
+4. O médico C não pode trabalhar simultaneamente em: 
+a) árvore parcial da busca; 
+5. O médico D pode trabalhar no máximo dois turnos. 
+c) conflitos encontrados; d) estados descartados; 
+Modelar o problema como um Constraint Satisfaction Problem (CSP). Apresentar: a) conjunto de variáveis; b) domínio de cada va riável; c) restrições unárias; d) restrições binárias; e) restrições globais; f) representação do grafo de restrições. Em seguida, resolver o problema manualmente utilizando Backtracking e apresentar: 
+e) retrocessos realizados: 
+b) ordem de atribuição das variáveis; 
+Apresentar a tabela: f) solução final encontrada. 
+2 3 
+T3 
+T1,T2 
+Passo | Variável atribufda| Estado parcial T1-A T2--A 
+T2 e Ts 
+T2-B 
+b) por que ela foi escolhida, 
+Resolver o problena utilizando MRV (Minimum Remaining Va lues) e Degree Heuristic e explicar: 
+{Tl-A} conflito (T1-A,T2-B} 
+a) qual variável foi escolhida erm cada passo; c) como MRV reduziu o espaço de busca; d) cono Degree influenciou a busca. 
+Implementar Forward Checking e apresentar: a) redução dos domínios após cada atribuíção; b) domínios elirminados; c) momento em que inconsistências foram detectadas; d) comparação com backtracking simples. Implementar Backjurnping e apresentar: a) variáveis responsáveis pelos conflitos; b) saltos realizados; c) diferenças para backtracking tradicional; d) redução observada na árvore de busca. Implementar os algoritmos Backtracking, Backtracking + MRV, Back tracking + MRV + Degree, Forward Checking e Backjumping em Python respeitando os seguintes critérios: NÃO utilizar bibliotecas externas, bi bliotecas prontas de CSP, OR-Tools e implementações encontradas na internet. Todo o código deve ser autoral. Por fim, comparar os algoritmos considerando: a) número de estados explorados; b) número de retrocessos; c) velocidade de execução; d) con sumo de memória; e) facilidade de implernentação; f) eficiência prática. Questão 05 -Minimax e Poda Alpha-Beta Considerar a seguinte árvore de jogo para um jogo determinístico de dois jogadores. O jogador MAX realiza a primeira jogada na raiz da árvore. Os valores nas folhas representam a utilidade final do jogo. 
+3/4 
+Os valores terminais são apresentados abaixo, da esquerda para a direita: [3, 5,6, 9, 1,2,0, -1, 7,4, 5, 6] A ordem de expansão dos filhos deve seguir obrigatoriamente da csquerda para a direita. Explicar: a) objetivo do algoritmo Minimax; b) diferença entre nós MAX e MIN; c) conceito de utilidade; d) propagação de valores na árvore; hipótese de adversário perfeito; f) objetivo da poda Alpha-Beta. Executar passo a passo o algoritmo Minimax na árvore apresentada e apresentar: a) valores calculados em cada nó; b) ordem de expansão; c) propagação dos valores; d) decisão tomada por MAX; e) caminho esco lhido pelo algoritmo; f) árvore parcialmente preenchida. Apresentar a tabela: Nój Tipo | Valor Minimax A |MAX| BMIN | CMAX| Executar a Poda Alpha-Beta utilizando a MESMA ordem de expan são. Apresentar: a) valores de ae Bem cada passo; b) monento em que ocorreraın podas; 
+MIN 
+c) quais ramos foram podados; d) motivo matenático da poda; Apresentar a tabela: e) quantidade de nós NẮO explorados.
+
+===== PAGINA 4 =====
+
+Alterar a ordem de expansão dos filhos de forma a maximizar o número de podas. Em seguida, discutir: a) Quantas podas ocorreram antes? b) Quantas podas ocorreram depois? 
+Passo | Nó| a | 3| Poda? 
+c) Por que a nova ordem melhora a eficiência? 
+Responder: 
+d) Qual a relação entre ordenação e desempenho? 
+1 
+Considerar agora que a árvore é muito grande e que a busca deve parar na profundidade 2. Os seguintes valores heurísticos devem ser usados nos nós não-terminais da profundidade limite: 
+a) executar Minimax limitado: b) utilizar os valores heurísticos; c) comparar a decisão com Minimax completo: 
+decisões. 
+d) discutir possíveis erros causados pela heurística. 
+(4,7,2, 5,6, 1] 
+Implementar os algoritmos Minimaz, Alpha-Beta e Minimar con pro fundidade limitada, em Python respeitando os seguints critěrics: NÃO utilizar bibliotecas externas, bibliotecas pront.as de jogos, e implementa Ções encontradas na internet. Todo o oódigo deve scr autoral. Comparar Minimax e Alpha-Beta considerando: a) númeto de nós ex plorados; b) quantidade de podas; c) custo compautaciosal, d) couno de memória; e) impacto da ordenaçâo dos movinentos; f) qualkiacje das Em um experimento adicional, modificar os valores de exatamente 3 f Ihas da árvore, Após isso: 1, executar novamente Mininax; 2. executar novamente Alpha-Beta; 3. verificar se a decisão final mudou; 
+não sim 
+4. analisar a sensibilidade do algoritmo às utilidades. 
+a) seleção; 
+Questão 06-Monte Carlo Tree Search (MCTS) Considerar o jogo Connect-4 simplificado abaixo. O jogador vernelho deve decidir qual coluna jogar. O estado atual é: 
+b) expansão; 
+Legenda: V: vermelho e A: amarelo. As ações possíveis são: 
+c) simulação (rollout); d) retropropagação. 
+Para MCST, explicar detalhadamente: 
+Explicar também: 
+A 
+C1, C2, C3, C4 
+e) papel do número de visitas: 
+4/4 
+f) papel do número de vitórias; g) diferença entre exploração e explotação. Executar 10 iteraçõcs do algoritmo MCTS. Em cada iteraçåo apresentar: a) caminho selecionado; b) nó expandido; c) resultado do rollout; d) atualização de: e) árvore parcial construída. Utilizar: 
+Com: 
+e calcular: 
+UCTU) = +Cn 
+a) valor de UCT para cada ilho; b) nỏ selecionado; c) intuencia do termo de exploração; d) influềncia do ternmo de explotação. Apresentar a seguinte tabela: 
+cl c2 Jogada| Visitas| Vitórias| UCT 
+c3 
+a) quanticdade de exploração; b) diversidade de jogadas; c) estabilidade das decisões; 
+N(s), W(s) 
+C=l4 
+Executar novanente o algoritno utilizando C= (0.1 e depois C= 3.0 e cotnpaar: 
+e cornparar: 
+3 
+2. rollout semi-guloso: 
+n 
+5 
+d) qualidade das jogadas encontradas. Implementar dois tipos de rollout: 1. rollout totalnente aleatório; 
+a) qualidade das decisões; 
+• priorizar jogadas centrais; • bloquear vitória imediata do adversário. 
+b) velocidade de convergência; c) número de simulações necessárias. Implementar seleção, erpansão, rollout, retropropagação e cálculo de UCT em Python respeitando os seguintes critérios: NÃO utilizar bi bliotecas externas, bibliotecas prontas de jogos e implementações encon tradas na internet. Todo o código deve ser autoral. Por fim, comparar: a) rollout aleatório vs semi-guloso; b) diferentes va lores de C; c) número de iterações; d) estabilidade das decisöes.

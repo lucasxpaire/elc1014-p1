@@ -1,0 +1,237 @@
+\section{Questao 3 - Busca Local (8-Rainhas)}
+
+\subsection{Formulacao em espaco de estados}
+\[
+P = \langle Z, z_0, \text{Goal}, \text{Succ}, c \rangle
+\]
+\begin{itemize}[leftmargin=1.5em]
+  \item a) Estado formal: $z=(s_1,\dots,s_8)$, com $s_i \in \{1,\dots,8\}$ indicando a linha da rainha na coluna $i$. Assim, $Z=\{1,\dots,8\}^8$.
+  \item b) Estado inicial: $z_0=(1,1,1,1,1,1,1,1)$.
+  \item c) Teste de objetivo: $\text{Goal}(z)$ verdadeiro sse $h(z)=0$, onde $h(z)$ e o numero de pares de rainhas em conflito (mesma linha ou diagonal).
+  \item d) Funcao sucessora: $\text{Succ}(z)$ gera todos os estados obtidos movendo exatamente uma rainha para outra linha na mesma coluna.
+  \item e) Funcao de custo: $c(z,z')=1$ por movimento local (vizinho); em busca local, minimiza-se principalmente $h(z)$.
+  \item f) Representacao em Python: tupla de 8 inteiros (ex.: \texttt{(1,1,1,1,1,1,1,1)}).
+\end{itemize}
+
+\textbf{Interpretacao da superficie de busca (local):}
+\begin{itemize}[leftmargin=1.5em]
+  \item A paisagem de $h(s)$ e discreta e multimodal, com muitos planaltos e minimos locais.
+  \item Movimentos de uma unica rainha por coluna podem reduzir conflitos localmente, mas tambem podem levar a regioes sem melhoria estrita.
+\end{itemize}
+
+\subsection{Hill-Climbing (execucao manual)}
+\begingroup
+\small
+\begin{longtable}{c p{3.8cm} c p{7.2cm}}
+\toprule
+Iteracao & Estado atual & $h(s)$ & Estado escolhido e justificativa \\
+\midrule
+0 & [1,1,1,1,1,1,1,1] & 28 & [1,1,1,1,1,1,8,1] (h=21): melhor vizinho \\
+1 & [1,1,1,1,1,1,8,1] & 21 & [1,1,1,1,1,1,8,2] (h=15): melhor vizinho \\
+2 & [1,1,1,1,1,1,8,2] & 15 & [1,1,1,1,7,1,8,2] (h=10): melhor vizinho \\
+3 & [1,1,1,1,7,1,8,2] & 10 & [1,1,6,1,7,1,8,2] (h=6): melhor vizinho \\
+4 & [1,1,6,1,7,1,8,2] & 6 & [5,1,6,1,7,1,8,2] (h=3): melhor vizinho \\
+5 & [5,1,6,1,7,1,8,2] & 3 & [5,1,6,4,7,1,8,2] (h=1): melhor vizinho \\
+6 & [5,1,6,4,7,1,8,2] & 1 & parada: nao existe vizinho com $h$ menor \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\textbf{Resultado do HC manual:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Estado final: [5,1,6,4,7,1,8,2].
+  \item $h$ final: 1.
+  \item Nao encontrou solucao valida ($h \neq 0$).
+  \item Numero total de iteracoes executadas: 7 (iteracoes 0 a 6), com 6 melhorias e 1 parada.
+  \item Tipo de parada: \textbf{plato} (existem vizinhos com mesmo valor de $h$, mas nenhum melhor).
+\end{itemize}
+
+\subsection{Top-5 vizinhos por iteracao (HC)}
+\begingroup
+\scriptsize
+\begin{longtable}{c p{4.7cm} c}
+\toprule
+Iteracao & Vizinho & $h(s)$ \\
+\midrule
+0 & [1,1,1,1,1,1,8,1] & 21 \\
+0 & [1,1,1,1,1,7,1,1] & 21 \\
+0 & [1,1,1,1,1,8,1,1] & 21 \\
+0 & [1,1,1,1,6,1,1,1] & 21 \\
+0 & [1,1,1,1,7,1,1,1] & 21 \\
+1 & [1,1,1,1,1,1,8,2] & 15 \\
+1 & [1,1,1,1,7,1,8,1] & 15 \\
+1 & [1,1,1,6,1,1,8,1] & 15 \\
+1 & [1,1,1,7,1,1,8,1] & 15 \\
+1 & [1,1,5,1,1,1,8,1] & 15 \\
+2 & [1,1,1,1,7,1,8,2] & 10 \\
+2 & [1,1,1,7,1,1,8,2] & 10 \\
+2 & [1,1,5,1,1,1,8,2] & 10 \\
+2 & [1,1,6,1,1,1,8,2] & 10 \\
+2 & [1,6,1,1,1,1,8,2] & 10 \\
+3 & [1,1,6,1,7,1,8,2] & 6 \\
+3 & [1,6,1,1,7,1,8,2] & 6 \\
+3 & [5,1,1,1,7,1,8,2] & 6 \\
+3 & [1,1,1,1,7,2,8,2] & 7 \\
+3 & [1,1,1,1,7,3,8,2] & 7 \\
+4 & [5,1,6,1,7,1,8,2] & 3 \\
+4 & [1,1,6,1,7,2,8,2] & 4 \\
+4 & [1,1,6,1,7,4,8,2] & 4 \\
+4 & [1,1,6,1,7,5,8,2] & 4 \\
+4 & [1,1,6,2,7,1,8,2] & 4 \\
+5 & [5,1,6,4,7,1,8,2] & 1 \\
+5 & [5,1,6,1,7,2,8,2] & 2 \\
+5 & [5,1,6,1,7,4,8,2] & 2 \\
+5 & [5,2,6,1,7,1,8,2] & 2 \\
+5 & [5,1,6,1,3,1,8,2] & 3 \\
+6 & [5,1,6,4,7,3,8,2] & 1 \\
+6 & [5,3,6,4,7,1,8,2] & 1 \\
+6 & [3,1,6,4,7,1,8,2] & 2 \\
+6 & [5,1,6,4,3,1,8,2] & 2 \\
+6 & [5,1,6,4,7,1,3,2] & 2 \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Todos os vizinhos avaliados por iteracao (HC)}
+\input{results/q3_hc_todos_vizinhos.tex}
+
+\subsection{Analise de armadilha de busca}
+\begin{itemize}[leftmargin=1.5em]
+  \item Tipo observado: \textbf{plato} (na iteracao final, melhor vizinho possui o mesmo valor de $h$).
+  \item Por que ocorreu: a vizinhanca de um movimento por coluna cria regioes planas no espaco de busca.
+  \item Impacto: o HC puro para sem atingir $h=0$, mesmo estando proximo da solucao.
+  \item Como evitar: random restart, movimentos laterais limitados ou simulated annealing.
+\end{itemize}
+
+\subsection{Random Restart Hill-Climbing (20 execucoes)}
+\begingroup
+\scriptsize
+\begin{longtable}{c p{3.5cm} c c c}
+\toprule
+Execucao & Estado inicial & Passos & $h(s)$ final & Solucao? \\
+\midrule
+1 & [2,6,2,4,7,8,8,4] & 4 & 1 & nao \\
+2 & [1,2,2,5,2,8,1,8] & 3 & 1 & nao \\
+3 & [6,4,7,5,6,6,7,2] & 4 & 1 & nao \\
+4 & [6,2,5,5,8,3,5,1] & 1 & 3 & nao \\
+5 & [6,6,8,7,2,7,8,2] & 5 & 0 & sim \\
+6 & [7,8,7,5,7,8,1,4] & 3 & 1 & nao \\
+7 & [3,1,2,7,8,3,8,4] & 3 & 0 & sim \\
+8 & [2,8,8,5,7,5,8,7] & 4 & 1 & nao \\
+9 & [7,4,5,5,1,1,3,8] & 2 & 1 & nao \\
+10 & [8,6,4,5,8,8,8,7] & 3 & 1 & nao \\
+11 & [1,5,6,8,2,8,5,8] & 3 & 1 & nao \\
+12 & [3,7,8,2,5,8,6,2] & 2 & 2 & nao \\
+13 & [4,7,3,8,1,2,1,8] & 2 & 1 & nao \\
+14 & [2,4,4,2,1,5,6,3] & 4 & 0 & sim \\
+15 & [1,6,8,3,4,8,3,5] & 1 & 1 & nao \\
+16 & [2,7,3,3,5,7,7,3] & 4 & 2 & nao \\
+17 & [4,7,1,2,7,2,1,6] & 3 & 1 & nao \\
+18 & [6,1,1,8,6,5,8,6] & 5 & 0 & sim \\
+19 & [2,8,8,3,3,4,7,6] & 3 & 0 & sim \\
+20 & [8,4,2,7,1,4,3,1] & 3 & 1 & nao \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\textbf{Resumo RR-HC:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Taxa de sucesso: $5/20 = 25.0\%$.
+  \item Media de $h$ final: 0.95.
+  \item Media de passos por execucao: 3.10.
+\end{itemize}
+
+\subsection{Simulated Annealing}
+\[
+P(\text{aceitar pior}) = e^{-\Delta E / T}
+\]
+\begin{itemize}[leftmargin=1.5em]
+  \item Temperatura inicial: $T_0 = 25.0$.
+  \item Resfriamento: $T \leftarrow \alpha T$ com $\alpha = 0.97$.
+  \item Parada: $T < 0.001$ ou limite de 3000 passos.
+  \item Execucao detalhada: inicio [1,6,8,1,5,2,8,8], melhor estado [3,6,2,7,1,4,8,5], \textbf{best $h=0$} (sucesso), 311 passos.
+\end{itemize}
+
+\textbf{Exemplos de movimentos piores aceitos (execucao detalhada):}
+\begingroup
+\scriptsize
+\begin{table}[H]
+\centering
+\begin{tabular}{c c c c c c}
+\toprule
+Step & $h_{atual}\rightarrow h_{novo}$ & $\Delta$ & $T$ & $e^{-\Delta/T}$ & sorteio \\
+\midrule
+5  & $5\rightarrow8$  & +3 & 21.4684 & 0.8696 & 0.3689 \\
+6  & $8\rightarrow12$ & +4 & 20.8243 & 0.8252 & 0.4443 \\
+13 & $6\rightarrow7$  & +1 & 16.8257 & 0.9423 & 0.8105 \\
+14 & $7\rightarrow8$  & +1 & 16.3209 & 0.9406 & 0.4154 \\
+19 & $4\rightarrow5$  & +1 & 14.0153 & 0.9311 & 0.6297 \\
+22 & $4\rightarrow5$  & +1 & 12.7914 & 0.9248 & 0.3176 \\
+23 & $5\rightarrow7$  & +2 & 12.4077 & 0.8511 & 0.1797 \\
+24 & $7\rightarrow9$  & +2 & 12.0354 & 0.8469 & 0.3187 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\endgroup
+
+\textbf{Lote SA (20 execucoes):}
+\begingroup
+\scriptsize
+\begin{longtable}{c p{3.5cm} c c c}
+\toprule
+Execucao & Estado inicial & Passos & best $h$ & Solucao? \\
+\midrule
+1 & [5,1,6,3,4,6,1,2] & 333 & 1 & nao \\
+2 & [7,8,4,5,7,1,7,4] & 333 & 1 & nao \\
+3 & [6,3,1,7,7,8,1,7] & 291 & 0 & sim \\
+4 & [2,1,3,8,7,5,7,2] & 173 & 0 & sim \\
+5 & [4,5,3,8,7,3,7,1] & 333 & 1 & nao \\
+6 & [8,8,7,2,2,6,6,1] & 333 & 1 & nao \\
+7 & [2,1,8,3,4,5,1,2] & 333 & 1 & nao \\
+8 & [1,2,5,2,5,5,6,2] & 333 & 1 & nao \\
+9 & [2,8,8,3,3,6,6,6] & 319 & 0 & sim \\
+10 & [1,3,2,7,1,7,5,6] & 333 & 1 & nao \\
+11 & [2,6,5,2,3,5,3,2] & 333 & 1 & nao \\
+12 & [6,4,8,1,5,7,6,2] & 333 & 1 & nao \\
+13 & [2,2,7,1,2,6,2,5] & 333 & 1 & nao \\
+14 & [4,5,2,7,4,7,6,3] & 110 & 0 & sim \\
+15 & [7,8,7,3,4,5,4,6] & 333 & 1 & nao \\
+16 & [4,1,8,8,4,7,2,8] & 333 & 1 & nao \\
+17 & [5,6,5,5,1,4,4,4] & 333 & 1 & nao \\
+18 & [8,7,2,6,4,3,4,6] & 333 & 1 & nao \\
+19 & [2,8,5,4,7,3,8,8] & 333 & 1 & nao \\
+20 & [2,2,6,7,3,1,8,6] & 333 & 1 & nao \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\textbf{Resumo SA:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Taxa de sucesso: $4/20 = 20.0\%$.
+  \item Media de best $h$: 0.80.
+  \item Media de passos por execucao: 311.05.
+  \item Comparacao direta com HC simples: o HC manual parou em $h=1$, enquanto o SA alcancou $h=0$ na execucao detalhada e encontrou 4 solucoes validas em 20 execucoes.
+\end{itemize}
+
+\subsection{Comparacao final (Q3)}
+\begingroup
+\footnotesize
+\begin{table}[H]
+\centering
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.8cm} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{3.2cm}}
+\toprule
+Criterio & Hill-Climbing & RR Hill-Climbing & Simulated Annealing \\
+\midrule
+Qualidade da solucao & Falhou no caso manual ($h=1$) & 25\% de sucesso (5/20) & 20\% de sucesso (4/20), com melhor best $h$ medio (0.80) \\
+Velocidade de convergencia & Muito rapido (6 melhorias) & Rapido por tentativa (3.10 passos em media) & Mais lento (311.05 passos em media) \\
+Sensibilidade ao estado inicial & Alta & Media & Media/baixa \\
+Escapa de maximos locais/platos & Nao & Parcialmente (por reinicio) & Sim (probabilistico) \\
+Custo computacional & Baixo & Medio & Alto \\
+Estabilidade dos resultados & Deterministico para um estado inicial fixo & Variavel entre execucoes & Variavel e sensivel aos parametros de temperatura \\
+\bottomrule
+\end{tabular}
+\caption{Comparacao dos metodos de busca local para 8-rainhas}
+\end{table}
+\endgroup

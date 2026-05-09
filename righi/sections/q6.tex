@@ -1,0 +1,202 @@
+\section{Questao 6 - Monte Carlo Tree Search (MCTS)}
+
+\subsection{Escopo e modelagem usada}
+Para a Q6, foi usada uma modelagem simplificada e autoral do estado de decisao na raiz do Connect-4:
+\begin{itemize}[leftmargin=1.5em]
+  \item Acoes possiveis na raiz: $\{C1,C2,C3,C4\}$;
+  \item cada acao gera um filho imediato na arvore de busca;
+  \item cada simulacao retorna resultado binario para MAX (vermelho): vitoria = 1, derrota = 0.
+\end{itemize}
+
+Representacao em Python (\texttt{codes/q6\_mcts.py}):
+\begin{itemize}[leftmargin=1.5em]
+  \item no armazena \texttt{visits} $=N(s)$ e \texttt{wins} $=W(s)$;
+  \item estrutura de arvore por ponteiro \texttt{parent} + dicionario \texttt{children};
+  \item implementacao 100\% autoral, sem bibliotecas externas de jogos/MCTS.
+\end{itemize}
+
+\subsection{Explicacao do MCTS (itens teoricos do enunciado)}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Selecao:} desce pela arvore escolhendo filho com maior UCT.
+  \item \textbf{Expansao:} ao atingir no com filhos ainda nao criados, adiciona-se um novo filho.
+  \item \textbf{Simulacao (rollout):} a partir do no expandido, simula-se uma partida ate termino (aqui, modelo simplificado de resultado).
+  \item \textbf{Retropropagacao:} atualiza-se $N(s)$ e $W(s)$ do no atual ate a raiz.
+\end{itemize}
+
+Metricas pedidas:
+\begin{itemize}[leftmargin=1.5em]
+  \item $N(s)$: numero de visitas do estado.
+  \item $W(s)$: numero de vitorias acumuladas para MAX.
+  \item Exploitation: $\frac{W(s)}{N(s)}$ (qualidade media observada).
+  \item Exploration: termo que prioriza nos pouco visitados.
+\end{itemize}
+
+\subsection{Formula UCT usada}
+\[
+\mathrm{UCT}(s_i)=\frac{W(s_i)}{N(s_i)} + C\sqrt{\frac{\ln N(\text{pai})}{N(s_i)}}
+\]
+com $C=1.4$ no experimento principal.
+
+\subsection{Execucao detalhada (10 iteracoes)}
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{c p{2.5cm} p{3.0cm} c c}
+\toprule
+Iter. & Caminho & No expandido/reusado & Rollout & $(N,W)$ no no escolhido \\
+\midrule
+1 & raiz $\rightarrow C1$ & $C1$ & vitoria & $(1,1)$ \\
+2 & raiz $\rightarrow C2$ & $C2$ & vitoria & $(1,1)$ \\
+3 & raiz $\rightarrow C3$ & $C3$ & vitoria & $(1,1)$ \\
+4 & raiz $\rightarrow C4$ & $C4$ & derrota & $(1,0)$ \\
+5 & raiz $\rightarrow C1$ & (reuso) $C1$ & vitoria & $(2,2)$ \\
+6 & raiz $\rightarrow C2$ & (reuso) $C2$ & vitoria & $(2,2)$ \\
+7 & raiz $\rightarrow C3$ & (reuso) $C3$ & derrota & $(2,1)$ \\
+8 & raiz $\rightarrow C1$ & (reuso) $C1$ & vitoria & $(3,3)$ \\
+9 & raiz $\rightarrow C2$ & (reuso) $C2$ & derrota & $(3,2)$ \\
+10 & raiz $\rightarrow C1$ & (reuso) $C1$ & derrota & $(4,3)$ \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Arvore parcial apos as 10 iteracoes}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  level distance=20mm,
+  sibling distance=22mm,
+  rootnode/.style={draw, rounded corners, minimum width=24mm, minimum height=10mm, align=center, fill=gray!10},
+  bestnode/.style={draw, circle, minimum size=12mm, align=center, thick, blue!70},
+  nodeok/.style={draw, circle, minimum size=12mm, align=center, fill=gray!10},
+  edge from parent/.style={-Latex}
+]
+\node[rootnode] (r) {raiz\\$N=10,\ W=6$}
+  child { node[bestnode] {$C1$\\\scriptsize $N=4,W=3$} }
+  child { node[nodeok] {$C2$\\\scriptsize $N=3,W=2$} }
+  child { node[nodeok] {$C3$\\\scriptsize $N=2,W=1$} }
+  child { node[nodeok] {$C4$\\\scriptsize $N=1,W=0$} };
+\end{tikzpicture}
+\caption{Arvore parcial do MCTS apos 10 iteracoes (azul = jogada mais visitada)}
+\end{figure}
+
+\subsection{Tabela UCT apos 10 iteracoes}
+Para $N(\text{pai})=10$ e $C=1.4$:
+\begingroup
+\small
+\begin{table}[H]
+\centering
+\begin{tabular}{c c c c c c}
+\toprule
+Jogada & $N$ & $W$ & $\frac{W}{N}$ & $1.4\sqrt{\frac{\ln 10}{N}}$ & UCT \\
+\midrule
+$C1$ & 4 & 3 & 0.7500 & 1.0622 & 1.8122 \\
+$C2$ & 3 & 2 & 0.6667 & 1.2265 & 1.8932 \\
+$C3$ & 2 & 1 & 0.5000 & 1.5022 & 2.0022 \\
+$C4$ & 1 & 0 & 0.0000 & 2.1244 & 2.1244 \\
+\bottomrule
+\end{tabular}
+\caption{Calculo de UCT por filho da raiz}
+\end{table}
+\endgroup
+
+\textbf{Leitura da tabela:}
+\begin{itemize}[leftmargin=1.5em]
+  \item maior \textit{exploitation} (\(W/N\)): $C1$;
+  \item maior UCT no instante: $C4$, por forte termo de exploracao (poucas visitas);
+  \item decisao final de jogada no codigo: por maior numero de visitas, resultando em \textbf{$C1$}.
+\end{itemize}
+
+\subsection{Sensibilidade ao parametro C (rollout semi-guloso)}
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{table}[H]
+\centering
+\begin{tabular}{c p{2.8cm} c c c}
+\toprule
+$C$ & Movimento mais estavel & Estabilidade & Diversidade media & Winrate medio \\
+\midrule
+0.1 & $C1$ & 57.5\% & 0.42 & 0.696 \\
+1.4 & $C1$ & 75.0\% & 0.94 & 0.641 \\
+3.0 & $C1$ & 72.5\% & 0.99 & 0.627 \\
+\bottomrule
+\end{tabular}
+\caption{Impacto do parametro de exploracao $C$}
+\end{table}
+\endgroup
+
+\textbf{Interpretacao:}
+\begin{itemize}[leftmargin=1.5em]
+  \item $C=0.1$: baixa exploracao, menor diversidade e tendencia mais gulosa;
+  \item $C=1.4$: melhor equilibrio entre explorar e consolidar decisao;
+  \item $C=3.0$: exploracao muito alta, aumentando diversidade, mas com queda de qualidade media.
+\end{itemize}
+
+\subsection{Rollout aleatorio vs semi-guloso (C=1.4)}
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{table}[H]
+\centering
+\begin{tabular}{p{2.3cm} p{2.6cm} c c c}
+\toprule
+Politica de rollout & Movimento mais estavel & Estabilidade & Diversidade media & Winrate medio \\
+\midrule
+Aleatorio & $C1$ & 70.0\% & 0.94 & 0.551 \\
+Semi-guloso & $C1$ & 75.0\% & 0.94 & 0.641 \\
+\bottomrule
+\end{tabular}
+\caption{Comparacao entre politicas de simulacao}
+\end{table}
+\endgroup
+
+\textbf{Conclusao desta comparacao:}
+\begin{itemize}[leftmargin=1.5em]
+  \item semi-guloso foi melhor em qualidade (maior winrate medio);
+  \item semi-guloso tambem foi ligeiramente mais estavel na escolha final;
+  \item mantendo mesma diversidade media neste experimento.
+\end{itemize}
+
+\subsection{Efeito do numero de iteracoes}
+Experimento adicional com $C=1.4$:
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{table}[H]
+\centering
+\begin{tabular}{c p{2.3cm} c c c}
+\toprule
+Iteracoes & Rollout & Movimento estavel & Estabilidade & Winrate medio \\
+\midrule
+10 & semi-guloso & $C1$ & 65.0\% & 0.613 \\
+20 & semi-guloso & $C1$ & 62.5\% & 0.611 \\
+40 & semi-guloso & $C1$ & 75.0\% & 0.641 \\
+80 & semi-guloso & $C1$ & 72.5\% & 0.631 \\
+120 & semi-guloso & $C1$ & 82.5\% & 0.651 \\
+\midrule
+10 & aleatorio & $C1$ & 62.5\% & 0.525 \\
+20 & aleatorio & $C1$ & 55.0\% & 0.536 \\
+40 & aleatorio & $C1$ & 70.0\% & 0.551 \\
+80 & aleatorio & $C1$ & 67.5\% & 0.552 \\
+120 & aleatorio & $C1$ & 72.5\% & 0.562 \\
+\bottomrule
+\end{tabular}
+\caption{Impacto do numero de iteracoes no MCTS}
+\end{table}
+\endgroup
+
+Em geral, mais iteracoes aumentam estabilidade da decisao e qualidade media, com ganho mais claro no rollout semi-guloso.
+
+\subsection{Comparacao final pedida na Q6}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{(a) Rollout aleatorio vs semi-guloso:} semi-guloso venceu em qualidade e estabilidade.
+  \item \textbf{(b) Diferentes valores de C:} $C$ baixo explora pouco; $C$ alto explora bastante; $C=1.4$ foi o melhor compromisso observado.
+  \item \textbf{(c) Numero de iteracoes:} aumentar iteracoes melhorou consolidacao da jogada escolhida.
+  \item \textbf{(d) Estabilidade das decisoes:} maior com semi-guloso e maior orcamento de simulacoes.
+\end{itemize}
+
+\subsection{Resposta objetiva da jogada sugerida}
+No cenario principal (10 iteracoes, $C=1.4$, rollout semi-guloso), a jogada escolhida pelo criterio de maior visita foi:
+\[
+\boxed{C1}
+\]
