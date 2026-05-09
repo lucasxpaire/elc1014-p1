@@ -1,0 +1,176 @@
+\section*{Questão 04 - CSP e Otimizações de Busca}
+
+\subsection*{A) Modelagem do Problema (CSP)}
+
+O problema do escalonamento de médicos no hospital pode ser rigorosamente modelado como um Problema de Satisfação de Restrições (CSP) contendo os seguintes elementos:
+
+\begin{itemize}
+    \item \textbf{Conjunto de Variáveis ($X$):} Cada turno a ser preenchido é uma variável. \\ $X = \{T_1, T_2, T_3, T_4, T_5, T_6\}$.
+    \item \textbf{Domínio ($D_i$):} O conjunto de médicos disponíveis para cada turno. \\ $D_i = \{A, B, C, D\}$ para todo $T_i \in X$.
+    \item \textbf{Restrições Unárias:} Envolvem apenas uma variável.
+    \begin{itemize}
+        \item O médico A não pode trabalhar em T3: $T_3 \neq A$.
+    \end{itemize}
+    \item \textbf{Restrições Binárias:} Envolvem pares de variáveis.
+    \begin{itemize}
+        \item Médicos não podem trabalhar em turnos consecutivos: $T_i \neq T_{i+1}$ para $i \in \{1, 2, 3, 4, 5\}$.
+        \item O médico C não pode trabalhar simultaneamente em T2 e T5: $\neg(T_2 = C \land T_5 = C)$.
+    \end{itemize}
+    \item \textbf{Restrições Globais:} Envolvem três ou mais variáveis.
+    \begin{itemize}
+        \item O médico B deve trabalhar em pelo menos um turno entre T1 e T2: $B \in \{T_1, T_2\}$. (Pode ser tratada como binária, mas logicamente engloba uma restrição de ocorrência).
+        \item O médico D pode trabalhar no máximo em dois turnos: $Count(T_i = D) \leq 2$.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Representação do Grafo de Restrições:}
+(Apenas as restrições binárias explícitas estão desenhadas. A restrição global e a unária atuam de forma generalizada/local).
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=2cm,
+    var/.style={circle, draw=black, thick, fill=white, minimum size=1cm},
+    edge/.style={-, thick}
+]
+    \node[var] (T1) {$T_1$};
+    \node[var, right of=T1] (T2) {$T_2$};
+    \node[var, right of=T2] (T3) {$T_3$};
+    \node[var, right of=T3] (T4) {$T_4$};
+    \node[var, right of=T4] (T5) {$T_5$};
+    \node[var, right of=T5] (T6) {$T_6$};
+
+    \draw[edge] (T1) -- (T2) node[midway, above] {\small $\neq$};
+    \draw[edge] (T2) -- (T3) node[midway, above] {\small $\neq$};
+    \draw[edge] (T3) -- (T4) node[midway, above] {\small $\neq$};
+    \draw[edge] (T4) -- (T5) node[midway, above] {\small $\neq$};
+    \draw[edge] (T5) -- (T6) node[midway, above] {\small $\neq$};
+    
+    \draw[edge, red, dashed, bend right=40] (T2) to node[midway, below] {\small $\neg(C \land C)$} (T5);
+\end{tikzpicture}
+\end{center}
+
+\subsection*{B) Backtracking Simples}
+
+A busca em profundidade com backtracking atribui variáveis na ordem ($T_1 \dots T_6$) e testa os valores na ordem lexicográfica ($A, B, C, D$).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Passo} & \textbf{Variável atribuída} & \textbf{Estado Parcial} \\ \hline
+1 & $T_1 = A$ & $\{T_1 = A\}$ \\ \hline
+2 & $T_2 = A$ & conflito (turno consecutivo) \\ \hline
+3 & $T_2 = B$ & $\{T_1 = A, T_2 = B\}$ \\ \hline
+4 & $T_3 = A$ & conflito (restrição unária $T_3 \neq A$) \\ \hline
+5 & $T_3 = B$ & conflito (turno consecutivo) \\ \hline
+6 & $T_3 = C$ & $\{T_1 = A, T_2 = B, T_3 = C\}$ \\ \hline
+7 & $T_4 = A$ & $\{T_1 = A, T_2 = B, T_3 = C, T_4 = A\}$ \\ \hline
+8 & $T_5 = A$ & conflito (turno consecutivo) \\ \hline
+9 & $T_5 = B$ & $\{T_1 = A, T_2 = B, T_3 = C, T_4 = A, T_5 = B\}$ \\ \hline
+10 & $T_6 = A$ & $\{T_1 = A, T_2 = B, T_3 = C, T_4 = A, T_5 = B, T_6 = A\}$ \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Conflitos encontrados:} $T_2=A$, $T_3=A$, $T_3=B$, e $T_5=A$.
+    \item \textbf{Estados descartados:} 4 estados parciais falharam nas verificações de consistência locais.
+    \item \textbf{Retrocessos (Backtracks) realizados:} 0. Como a primeira ramificação válida não encontrou nenhum "beco sem saída" (dead-end onde todos os valores do domínio falham), o algoritmo não precisou desfazer atribuições confirmadas na árvore.
+    \item \textbf{Solução final:} $\{T_1=A, T_2=B, T_3=C, T_4=A, T_5=B, T_6=A\}$.
+\end{itemize}
+
+\textbf{Árvore Parcial de Busca:}
+\begin{center}
+\begin{forest}
+  for tree={
+    circle,
+    draw,
+    minimum size=1cm,
+    inner sep=1pt,
+    s sep=10mm,
+    l sep=10mm,
+    font=\small
+  }
+  [{}, label=above:{Raiz}
+    [{$T_1=A$}, fill=blue!20, edge={thick}
+      [{$T_2=A$}, fill=red!20, label=below:{\tiny Conflito}]
+      [{$T_2=B$}, fill=blue!20, edge={thick}
+        [{$T_3=A$}, fill=red!20, label=below:{\tiny Conflito}]
+        [{$T_3=B$}, fill=red!20, label=below:{\tiny Conflito}]
+        [{$T_3=C$}, fill=blue!20, edge={thick}
+            [{$T_4=A$}, fill=blue!20, edge={thick}
+                [{$T_5=A$}, fill=red!20, label=below:{\tiny Conflito}]
+                [{$T_5=B$}, fill=blue!20, edge={thick}
+                    [{$T_6=A$}, fill=green!40, label=below:{\tiny Solução}]
+                ]
+            ]
+        ]
+      ]
+    ]
+  ]
+\end{forest}
+\end{center}
+\textit{Legenda: \textcolor{blue}{Azul} (Nós válidos expandidos/visitados), \textcolor{red}{Vermelho} (Falha de consistência local), \textcolor{green}{Verde} (Solução Global).}
+
+\subsection*{C) MRV (Minimum Remaining Values) + Degree Heuristic}
+
+Esta heurística altera a ordem de seleção das variáveis dinamicamente:
+\begin{itemize}
+    \item \textbf{Passo 1 (MRV):} $T_3$ foi escolhida. Como o domínio inicial tem a restrição unária ($T_3 \neq A$), seu domínio é $\{B, C, D\}$ (tamanho 3, o menor).
+    \item \textbf{Passo 2 (Degree):} Empate de MRV entre as demais variáveis. $T_2$ foi escolhida pela \textit{Degree Heuristic}, pois $T_2$ possui o maior número de restrições com variáveis não atribuídas (conecta-se com $T_1$, $T_3$ e $T_5$).
+    \item \textbf{Redução do Espaço de Busca:} O MRV reduz a árvore de busca selecionando a variável que tem maior probabilidade de falhar (fail-first). Se $T_3$ tivesse um domínio restrito no meio da busca, tentar resolvê-lo logo evita a expansão de grandes subárvores inúteis.
+    \item \textbf{Influência do Degree Heuristic:} Como um "tie-breaker" (desempate), escolher variáveis fortemente conectadas (como $T_2$) impõe imediatamente mais restrições aos vizinhos, forçando falhas precoces e podando a árvore.
+\end{itemize}
+
+\subsection*{D) Forward Checking}
+
+Ao invés de checar a consistência apenas \textit{após} a atribuição, o Forward Checking olha adiante e remove valores inválidos dos domínios das variáveis vizinhas futuras.
+
+\textbf{Redução de Domínios e Execução:}
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Atribuição} & \textbf{Domínios Restantes (Redução)} \\ \hline
+$T_1 = A$ & $T_2: \{B\}$, $T_3: \{B, C, D\}$, $T_{4..6}: \{A, B, C, D\}$ \\ \hline
+$T_2 = B$ & $T_3: \{C, D\}$, $T_4: \{A, B, C, D\}$, $T_{5..6}: \{A, B, C, D\}$ \\ \hline
+$T_3 = C$ & $T_4: \{A, B, D\}$, $T_{5..6}: \{A, B, C, D\}$ \\ \hline
+$T_4 = A$ & $T_5: \{B, C, D\}$, $T_6: \{A, B, C, D\}$ \\ \hline
+$T_5 = B$ & $T_6: \{A, C, D\}$ \\ \hline
+$T_6 = A$ & \textbf{Solução alcançada.} \\ \hline
+\end{tabular}
+}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Momentos de detecção de inconsistência:} No nosso trace, a atribuição natural gerou reduções consistentes, e em nenhum momento um domínio se tornou Vazio (tamanho 0). 
+    \item \textbf{Comparação com Backtracking:} Enquanto o BT testou 10 estados para atingir a solução (passando por atribuições cegas que causavam conflitos), o Forward Checking visitou \textbf{apenas 6 estados} (cada atribuição foi certa), pois as opções que dariam conflito ($T_2=A$, $T_3=A$) foram eliminadas \textit{a priori} da lista de candidatos.
+\end{itemize}
+
+\subsection*{E) Backjumping}
+
+O Backjumping (Conflict-Directed Backjumping - CBJ) difere do Backtracking por saltar níveis múltiplos na árvore de volta para a variável que originou o conflito, em vez de voltar apenas para a variável imediatamente anterior.
+
+\begin{itemize}
+    \item \textbf{Comportamento na Execução Atual:} Para esta instância específica do problema com a ordem lexicográfica inicial, não houve a formação de "dead-ends" (situação onde o backtracking tradicional faria `del assignment[var]`). Logo, foram realizados \textbf{0 saltos}.
+    \item \textbf{Variáveis e Conflitos (Caso Teórico):} Se $T_5$ estivesse sem valores no domínio porque as opções foram vetadas por $T_2$ e $T_4$, o algoritmo montaria o \textit{Conflict Set} $\{T_2, T_4\}$.
+    \item \textbf{Diferenças e Saltos:} O BT tradicional retrocederia cronologicamente para $T_4$, mudaria seu valor e tentaria de novo. O Backjumping saltaria diretamente para o último culpado listado no Conflict Set, o que evita explorar subárvores que inevitavelmente falhariam pelos mesmos motivos do passado.
+    \item \textbf{Redução na Árvore:} Em problemas altamente restritos (ex: D atingindo o limite de plantões e travando o final da escala), o Backjumping poda ramos massivos, reduzindo a complexidade de $O(D^N)$ cronológico para focar apenas no subgrafo das variáveis em conflito.
+\end{itemize}
+
+\subsection*{F) Comparação dos Algoritmos}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|p{3.5cm}|p{2.5cm}|p{2.5cm}|p{2.5cm}|p{3.5cm}|}
+\hline
+\textbf{Critério} & \textbf{Backtracking} & \textbf{BT + MRV/Degree} & \textbf{Forward Checking} & \textbf{Backjumping} \\ \hline
+\textbf{Estados Explorados} & 10 (Mais testes) & 6 (Ordenação ótima) & 6 (Eliminação prévia) & 10 (Sem saltos reais aqui) \\ \hline
+\textbf{Retrocessos} & 0 & 0 & 0 & 0 \\ \hline
+\textbf{Velocidade} & Muito Rápida & Leve overhead no MRV & Overhead por cópia de domínio & Maior (gestão do conflict set) \\ \hline
+\textbf{Consumo de Memória} & Muito Baixo & Baixo & Médio (Cópia de domínios na recursão) & Médio (Armazena Conjuntos de Conflito) \\ \hline
+\textbf{Facilidade de Implementação} & Simples ($O(1)$ lógicas) & Média & Média & Alta (Requer traçar origens de falhas) \\ \hline
+\end{tabular}
+}
+\end{table}
