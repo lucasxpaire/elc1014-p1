@@ -1,0 +1,242 @@
+\section*{Questão 05 - Minimax e Poda Alpha-Beta}
+
+\subsection*{A) Teoria: Algoritmos Adversariais}
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{Objetivo do Algoritmo Minimax:} Determinar a estratégia ótima para um jogador em um jogo de soma zero, maximizando a utilidade mínima garantida, assumindo que o oponente também joga de forma ótima.
+    \item \textbf{Diferença entre nós MAX e MIN:} Os nós MAX representam a vez do jogador principal (que deseja maximizar a pontuação final), portanto ele escolhe o filho com o maior valor. Os nós MIN representam a vez do adversário (que deseja prejudicar o MAX), portanto ele escolhe o filho com o menor valor.
+    \item \textbf{Conceito de Utilidade:} É o valor numérico associado aos estados terminais (folhas) do jogo, representando o "score" final (vitória, derrota, empate ou pontos acumulados).
+    \item \textbf{Propagação de Valores:} A busca desce até as folhas (estados terminais) e os valores de utilidade "sobem" de volta para a raiz. Cada nó pai recebe o valor correspondente à escolha ótima (máximo ou mínimo) dentre seus nós filhos.
+    \item \textbf{Hipótese de Adversário Perfeito:} Assume-se que o oponente não comete erros e sempre escolhe a jogada que minimiza o retorno do jogador MAX.
+    \item \textbf{Objetivo da Poda Alpha-Beta:} Eliminar (podar) a exploração de ramos da árvore de busca que matematicamente não podem alterar a decisão final da raiz, reduzindo drasticamente o número de nós avaliados e economizando tempo computacional, mantendo exatamente o mesmo resultado do Minimax completo.
+\end{enumerate}
+
+\subsection*{B) Execução do Minimax}
+
+\textbf{Passo a passo, Ordem de Expansão e Propagação:} A busca desceu à esquerda (C, depois D, resolvendo B, depois E, resolvendo E, etc). Os valores foram subindo das folhas para as raízes locais.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Nó} & \textbf{Tipo} & \textbf{Valor Minimax} \\ \hline
+A & MAX & 6 \\ \hline
+B & MIN & 5 \\ \hline
+C & MAX & 5 \\ \hline
+D & MAX & 9 \\ \hline
+E & MIN & 0 \\ \hline
+F & MAX & 2 \\ \hline
+G & MAX & 0 \\ \hline
+H & MIN & 6 \\ \hline
+I & MAX & 7 \\ \hline
+J & MAX & 6 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Decisão tomada por MAX:} O nó A escolheu ir para a ramificação que garante o valor \textbf{6}.
+    \item \textbf{Caminho escolhido:} $A \rightarrow H \rightarrow J \rightarrow Folha(6)$.
+\end{itemize}
+
+\textbf{Árvore Preenchida (Caminho principal em Verde):}
+
+\begin{center}
+\begin{forest}
+  for tree={
+    circle,
+    draw,
+    minimum size=8mm,
+    inner sep=1pt,
+    s sep=5mm,
+    l sep=10mm,
+    font=\small
+  }
+  [$A(6)$, fill=green!40, edge={thick}
+    [$B(5)$
+      [$C(5)$ [3] [5]]
+      [$D(9)$ [6] [9]]
+    ]
+    [$E(0)$
+      [$F(2)$ [1] [2]]
+      [$G(0)$ [0] [-1]]
+    ]
+    [$H(6)$, fill=green!40, edge={thick}
+      [$I(7)$ [7] [4]]
+      [$J(6)$, fill=green!40, edge={thick}
+        [5] 
+        [6, fill=green!40, edge={thick}]
+      ]
+    ]
+  ]
+\end{forest}
+\end{center}
+
+\subsection*{C) Poda Alpha-Beta}
+
+A ordem é estrita da esquerda para a direita. O valor $\alpha$ (melhor alternativa de MAX) e $\beta$ (melhor alternativa de MIN) são atualizados em tempo real.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Passo} & \textbf{Nó} & \textbf{$\alpha$} & \textbf{$\beta$} & \textbf{Poda?} \\ \hline
+1 & C & 3 & $\infty$ & não \\ \hline
+2 & C & 5 & $\infty$ & não \\ \hline
+3 & B & $-\infty$ & 5 & não \\ \hline
+4 & D & 6 & 5 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+5 & B & $-\infty$ & 5 & não \\ \hline
+6 & A & 5 & $\infty$ & não \\ \hline
+7 & F & 5 & $\infty$ & não \\ \hline
+8 & F & 5 & $\infty$ & não \\ \hline
+9 & E & 5 & 2 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+10 & A & 5 & $\infty$ & não \\ \hline
+11 & I & 7 & $\infty$ & não \\ \hline
+12 & I & 7 & $\infty$ & não \\ \hline
+13 & H & 5 & 7 & não \\ \hline
+14 & J & 5 & 7 & não \\ \hline
+15 & J & 6 & 7 & não \\ \hline
+16 & H & 5 & 6 & não \\ \hline
+17 & A & 6 & $\infty$ & não \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Momentos e Ramos Podados:}
+    \begin{itemize}
+        \item Ocorreu poda no ramo do nó \textbf{D} (o valor terminal 9 nem precisou ser lido).
+        \item Ocorreu poda no ramo do nó \textbf{E} (o filho inteiro \textbf{G} e seus terminais 0 e -1 foram sumariamente descartados).
+    \end{itemize}
+    \item \textbf{Motivo Matemático:} No nó D (MAX), avaliamos a primeira folha "6". Neste momento o $\alpha$ local de D torna-se 6. Porém, o nó pai B (MIN) já tinha uma garantia $\beta=5$ vinda de C. Como $\alpha (6) \ge \beta (5)$, MAX nunca escolherá algo menor que 6, mas MIN nunca permitirá que MAX ganhe mais que 5. Logo, B nunca escolherá o caminho de D. A mesma lógica $\alpha \ge \beta$ causou a poda imensa em E.
+    \item \textbf{Quantidade de nós não explorados:} Em relação ao Minimax clássico (22 nós processados), exploramos apenas 18 nós lógicos. Os valores de folha [9], [0] e [-1] (além do nó G inteiro) foram completamente ignorados.
+\end{itemize}
+
+\subsection*{D) Alteração de Ordem de Expansão}
+
+Se ordenássemos os nós MAX de forma decrescente (do maior para o menor valor possível) e os nós MIN de forma crescente (menor para maior):
+
+\begin{itemize}
+    \item \textbf{Podas antes:} 2 podas principais (em D e E).
+    \item \textbf{Podas depois:} O número de podas seria massivamente ampliado. Ao achar o melhor caminho logo de início (H com valor 6), a variável global $\alpha=6$ ficaria estabelecida imediatamente na raiz A. Quando A fosse investigar o ramo de B, B avaliaria C(5), o que setaria seu $\beta=5$. Como $6 \ge 5$, todo o resto de B (o nó D inteiro) seria podado instantaneamente.
+    \item \textbf{Por que melhora a eficiência:} Avaliar os ramos ideais primeiro atualiza rapidamente as cotas $\alpha$ e $\beta$, fazendo com que os ramos irrelevantes seguintes encontrem imediatamente a condição matemática de poda $\alpha \ge \beta$.
+    \item \textbf{Relação Ordenação vs Desempenho:} No pior caso (ordem inversa da ideal), o Alpha-Beta explora todos os nós como o Minimax ($O(B^D)$). No melhor caso (ordenação perfeita), a complexidade cai drasticamente para $O(B^{D/2})$, permitindo dobrar a profundidade de busca no mesmo tempo computacional.
+\end{itemize}
+
+\subsubsection*{Árvore e Tabela com Ordenação Ideal}
+Com a ordenação perfeita, a árvore de exploração é reestruturada, priorizando os melhores caminhos na visão de MAX e MIN:
+
+\begin{center}
+\begin{forest}
+  for tree={
+    circle,
+    draw,
+    minimum size=8mm,
+    inner sep=1pt,
+    s sep=5mm,
+    l sep=10mm,
+    font=\small
+  }
+  [$A(6)$, fill=green!40, edge={thick}
+    [$H(6)$, fill=green!40, edge={thick}
+      [$J(6)$, fill=green!40, edge={thick} [6, fill=green!40, edge={thick}] [5] ]
+      [$I(7)$ [7] [4] ]
+    ]
+    [$B(5)$
+      [$C(5)$ [5] [3] ]
+      [$D(9)$ [9] [6] ]
+    ]
+    [$E(0)$
+      [$G(0)$ [0] [-1] ]
+      [$F(2)$ [2] [1] ]
+    ]
+  ]
+\end{forest}
+\end{center}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Passo} & \textbf{Nó} & \textbf{$\alpha$} & \textbf{$\beta$} & \textbf{Poda?} \\ \hline
+1 & J & 6 & $\infty$ & não \\ \hline
+2 & J & 6 & $\infty$ & não \\ \hline
+3 & H & $-\infty$ & 6 & não \\ \hline
+4 & I & 7 & 6 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+5 & H & $-\infty$ & 6 & não \\ \hline
+6 & A & 6 & $\infty$ & não \\ \hline
+7 & C & 6 & $\infty$ & não \\ \hline
+8 & C & 6 & $\infty$ & não \\ \hline
+9 & B & 6 & 5 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+10 & A & 6 & $\infty$ & não \\ \hline
+11 & G & 6 & $\infty$ & não \\ \hline
+12 & G & 6 & $\infty$ & não \\ \hline
+13 & E & 6 & 0 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+14 & A & 6 & $\infty$ & não \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection*{E) Minimax com Profundidade Limitada}
+
+Limitando a busca na profundidade 2 (onde residem os nós C, D, F, G, I, J), paramos de descer nas folhas e adotamos os valores heurísticos passados: \textit{C=4, D=7, F=2, G=5, I=6, J=1}.
+
+\begin{itemize}
+    \item \textbf{Execução Limitada:} 
+    \begin{itemize}
+        \item Nó B (MIN) $\rightarrow$ $\min(C=4, D=7) = 4$
+        \item Nó E (MIN) $\rightarrow$ $\min(F=2, G=5) = 2$
+        \item Nó H (MIN) $\rightarrow$ $\min(I=6, J=1) = 1$
+        \item Raiz A (MAX) $\rightarrow$ $\max(B=4, E=2, H=1) = \textbf{4}$
+    \end{itemize}
+    \item \textbf{Comparação com Minimax Completo:} A decisão final do Minimax limitado foi seguir o caminho \textbf{B}. O Minimax completo havia escolhido o caminho \textbf{H}. 
+    \item \textbf{Possíveis Erros (Horizon Effect):} Ocorreu um erro flagrante de heurística. A heurística avaliou mal o sub-ramo de H dando-lhe valor baixo (1), quando na realidade ele era a salvação e vitória (valor 6). Essa miopia gerada pelo "Efeito Horizonte" acontece quando um desastre ou ganho óbvio ocorre poucos passos abaixo do limite de profundidade artificial da busca, inviabilizando decisões ótimas absolutas.
+\end{itemize}
+
+\subsection*{F) Comparação Final e Experimento}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{4.5cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Critério} & \textbf{Minimax Completo} & \textbf{Alpha-Beta Pruning} \\ \hline
+\textbf{Número de nós explorados} & 22 & 18 (na ordem atual) \\ \hline
+\textbf{Quantidade de podas} & 0 & 2 podas diretas \\ \hline
+\textbf{Custo computacional} & Alto (Tempo $O(b^d)$) & Médio/Baixo ($O(b^{d/2})$ no melhor caso) \\ \hline
+\textbf{Custo de Memória} & Baixo ($O(bd)$ espacial) & Baixo ($O(bd)$ com 2 ponteiros numéricos extras) \\ \hline
+\textbf{Impacto da ordenação} & Nulo (sempre lerá tudo) & Massivo (rege toda a taxa de podas) \\ \hline
+\textbf{Qualidade das decisões} & Ótima (Absoluta) & Ótima (Matematicamente idêntica) \\ \hline
+\end{tabular}
+\end{table}
+
+\textbf{Experimento (Alteração de Folhas):} Modificamos via script Python 3 folhas (Folha 1 de F foi para 10, Folha 2 de F foi para 15, Folha 1 de I foi para -5).
+
+\subsubsection*{Tabela de Rastreio do Experimento (Alpha-Beta Pruning)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Passo} & \textbf{Nó} & \textbf{$\alpha$} & \textbf{$\beta$} & \textbf{Poda?} \\ \hline
+1 & C & 3 & $\infty$ & não \\ \hline
+2 & C & 5 & $\infty$ & não \\ \hline
+3 & B & $-\infty$ & 5 & não \\ \hline
+4 & D & 6 & 5 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+5 & B & $-\infty$ & 5 & não \\ \hline
+6 & A & 5 & $\infty$ & não \\ \hline
+7 & F & 10 & $\infty$ & não \\ \hline
+8 & F & 15 & $\infty$ & não \\ \hline
+9 & E & 5 & 15 & não \\ \hline
+10 & G & 5 & 15 & não \\ \hline
+11 & G & 5 & 15 & não \\ \hline
+12 & E & 5 & 0 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+13 & A & 5 & $\infty$ & não \\ \hline
+14 & I & 5 & $\infty$ & não \\ \hline
+15 & I & 5 & $\infty$ & não \\ \hline
+16 & H & 5 & 4 & \textbf{sim} ($\alpha \ge \beta$) \\ \hline
+17 & A & 5 & $\infty$ & não \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item 1 e 2. As execuções do script Minimax e Alpha-Beta foram refeitas.
+    \item 3. A \textbf{decisão final mudou}. O resultado de MAX global caiu para 5 (o antigo melhor caminho $H$ foi arruinado pelo $-5$ imposto no nó $I$).
+    \item 4. Analisando a sensibilidade: Pequenas alterações em utilidades de folhas críticas propagam-se severamente por todos os lances "garantidos" de Min/Max, alterando drasticamente o destino global (neste caso, o caminho B foi assumido como a única via de salvação "menos pior" rendendo 5).
+\end{itemize}

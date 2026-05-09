@@ -33,13 +33,13 @@ Estrutura de ramos:
 3. MIN 3: [MAX(7, 4), MAX(5, 6)]
 [FIM DA ÁRVORE DO PROBLEMA]
 
-A ordem de expansão dos filhos deve seguir obrigatoriamente da csquerda
+A ordem de expansão dos filhos deve seguir obrigatoriamente da esquerda
 para a direita. Explicar:
 a) objetivo do algoritmo Minimax;
 b) diferença entre nós MAX e MIN;
 c) conceito de utilidade;
 d) propagação de valores na árvore;
-hipótese de adversário perfeito;
+e) hipótese de adversário perfeito;
 f) objetivo da poda Alpha-Beta.
 
 Executar passo a passo o algoritmo Minimax na árvore apresentada e
@@ -47,24 +47,23 @@ apresentar: a) valores calculados em cada nó; b) ordem de expansão; c)
 propagação dos valores; d) decisão tomada por MAX; e) caminho esco
 lhido pelo algoritmo; f) árvore parcialmente preenchida.
 Apresentar a tabela:
-Nó | Tipo | Valor Minimax
+Colunas: Nó | Tipo | Valor Minimax
 
-A | MAX | ...
-B | MIN | ...
-C | MAX | ...
+Linha: A | MAX | ...
+Linha: B | MIN | ...
+Linha: C | MAX | ...
 
-Executar a Poda Alpha-Beta utilizando a MESMA ordem de expan
-são. Apresentar:
-a) valores de ae Bem cada passo;
+Executar a Poda Alpha-Beta utilizando a MESMA ordem de expansão. Apresentar:
+a) valores de alfa e beta em cada passo;
 b) momento em que ocorreram podas;
 c) quais ramos foram podados;
 d) motivo matemático da poda;
 e) quantidade de nós NÃO explorados.
 
 Apresentar a tabela:
-Passo | Nó | alfa | beta | Poda?
-1 | A | ... | ... | não
-2 | B | ... | ... | não
+Colunas: Passo | Nó | alfa | beta | Poda?
+Linha: 1 | A | ... | ... | não
+Linha: 2 | B | ... | ... | não
 
 Alterar a ordem de expansão dos filhos de forma a maximizar o número
 de podas. Em seguida, discutir:
@@ -86,20 +85,13 @@ b) utilizar os valores heurísticos;
 c) comparar a decisão com Minimax completo;
 d) discutir possíveis erros causados pela heurística.
 
-Implementar os algoritmos Minimaz, Alpha-Beta e Minimar con pro
-fundidade limitada, em Python respeitando os seguints critěrics: NÃO
-utilizar bibliotecas externas, bibliotecas pront.as de jogos, e implementa
-Ções encontradas na internet. Todo o oódigo deve scr autoral.
-Comparar Minimax e Alpha-Beta considerando: a) númeto de nós ex
-plorados; b) quantidade de podas; c) custo compautaciosal, d) couno
-de memória; e) impacto da ordenaçâo dos movinentos; f) qualkiacje das
-Em um experimento adicional, modificar os valores de exatamente 3 f
-Ihas da árvore, Após isso:
+Implementar os algoritmos Minimax, Alpha-Beta e Minimax com profundidade limitada, em Python respeitando os seguints critérios: NÃO utilizar bibliotecas externas.
+
+Comparar Minimax e Alpha-Beta considerando: a) número de nós explorados; b) quantidade de podas; c) custo compautacional, d) custo de memória; e) impacto da ordenação dos movimentos; f) qualidade das decisões.
+Em um experimento adicional, modificar os valores de exatamente 3 folhas da árvore, Após isso:
 1, executar novamente Mininax;
 2. executar novamente Alpha-Beta;
 3. verificar se a decisão final mudou;
-não
-sim
 4. analisar a sensibilidade do algoritmo às utilidades.
 
 [FIM DO TEXTO DA QUESTÃO]
